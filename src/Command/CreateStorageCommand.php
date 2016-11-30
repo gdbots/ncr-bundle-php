@@ -2,7 +2,7 @@
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
-use Gdbots\Ncr\Repository\NodeRepository;
+use Gdbots\Ncr\NcrAdmin;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\SchemaQName;
@@ -14,7 +14,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class CreateNodeRepositoryCommand extends ContainerAwareCommand
+class CreateStorageCommand extends ContainerAwareCommand
 {
     /**
      * {@inheritdoc}
@@ -22,10 +22,10 @@ class CreateNodeRepositoryCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('ncr:create-node-repository')
-            ->setDescription('Creates the node repository storage.')
+            ->setName('ncr:create-storage')
+            ->setDescription('Creates the NCR storage.')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command will create the storage for the node repository.  If a SchemaQName is not 
+The <info>%command.name%</info> command will create the storage for the NCR.  If a SchemaQName is not 
 provided it will run on all schemas having the mixin "gdbots:ncr:mixin:node".
 
 <info>php %command.full_name% --hints='{"tenant_id":"client1"}' 'acme:article'</info>
@@ -39,10 +39,17 @@ EOF
                 'Skip any schemas that fail to create.'
             )
             ->addOption(
+                'admin-service',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'The service id to load that implements Gdbots\Ncr\NcrAdmin',
+                'ncr'
+            )
+            ->addOption(
                 'hints',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Hints to provide to the node repository (json).'
+                'Hints to provide to the NCR (json).'
             )
             ->addArgument(
                 'qname',
@@ -68,7 +75,7 @@ EOF
 
         $container = $this->getContainer();
         $io = new SymfonyStyle($input, $output);
-        $io->title('Node Repository Creator');
+        $io->title('NCR Storage Creator');
 
         if (null === $qname) {
             $schemas = MessageResolver::findAllUsingMixin(NodeV1Mixin::create());
@@ -92,14 +99,22 @@ EOF
             $schemas = [$schema];
         }
 
-        /** @var NodeRepository $repository */
-        $repository = $container->get('gdbots_ncr.node_repository.dynamodb');
+        $ncr = $container->get($input->getOption('admin-service'));
+        if (!$ncr instanceof NcrAdmin) {
+            throw new \LogicException(
+                sprintf(
+                    'The service [%s] using class [%s] must implement Gdbots\Ncr\NcrAdmin.',
+                    $input->getOption('admin-service'),
+                    get_class($ncr)
+                )
+            );
+        }
 
         foreach ($schemas as $schema) {
             $qname = $schema->getQName();
 
             try {
-                $repository->createStorage($qname, $hints);
+                $ncr->createStorage($qname, $hints);
                 $io->success(sprintf('Created storage for "%s".', $qname));
             } catch (\Exception $e) {
                 if (!$skipErrors) {

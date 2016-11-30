@@ -14,7 +14,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class DescribeNodeRepositoryCommand extends ContainerAwareCommand
+class DescribeStorageCommand extends ContainerAwareCommand
 {
     /**
      * {@inheritdoc}
@@ -22,16 +22,13 @@ class DescribeNodeRepositoryCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('ncr:describe-node-repository')
-            ->setDescription('Describes a node repository.')
+            ->setName('ncr:describe-storage')
+            ->setDescription('Describes the NCR storage.')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command will describe the storage for a node repository.  If a curie is not provided
+The <info>%command.name%</info> command will describe the storage for the NCR.  If a curie is not provided
 it will run on all schemas having the mixin "gdbots:ncr:mixin:node".
 
-Each node schema (e.g. article, video, photo) can have its own storage.  Videos could be stored in DynamoDb, 
-users in MySQL, polls in Redis, etc.  All this command is doing is deriving the service that is expected to 
-exist for a given curie and asking it to describe its storage.  The repository service must implement
-"Gdbots\Ncr\Repository\CanCreateRepositoryStorage" otherwise it will be skipped.
+Each node schema (e.g. article, video, photo) can potentially have its own storage.
 
 <info>php %command.full_name% --hints='{"tenant_id":"client1"}' 'acme:article'</info>
 
