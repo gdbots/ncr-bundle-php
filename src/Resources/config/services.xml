@@ -3,12 +3,44 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
-  <!--
-  <parameters>
-  </parameters>
-
   <services>
+    <!-- start: ncr -->
+    <service id="gdbots_ncr.ncr.dynamodb" class="%gdbots_ncr.ncr.dynamodb.class%">
+      <argument type="service" id="aws.dynamodb" on-invalid="ignore"/>
+      <argument type="service" id="gdbots_ncr.ncr.dynamodb.table_manager" on-invalid="ignore"/>
+      <argument type="service" id="logger" on-invalid="ignore"/>
+      <tag name="monolog.logger" channel="ncr"/>
+    </service>
+
+    <service id="gdbots_ncr.ncr.dynamodb.table_manager" class="%gdbots_ncr.ncr.dynamodb.table_manager.class%">
+      <argument>%gdbots_ncr.ncr.dynamodb.table_name_prefix%</argument>
+      <argument>%gdbots_ncr.ncr.dynamodb.node_tables%</argument>
+    </service>
+    <!-- end: ncr -->
+
+
+    <!-- start: ncr search -->
+    <service id="gdbots_ncr.ncr_search.elastica" class="%gdbots_ncr.ncr_search.elastica.class%">
+      <argument type="service" id="gdbots_ncr.ncr_search.elastica.client_manager"/>
+      <argument type="service" id="gdbots_ncr.ncr_search.elastica.index_manager"/>
+      <argument type="service" id="logger" on-invalid="ignore"/>
+      <argument>%gdbots_ncr.ncr_search.elastica.query_timeout%</argument>
+      <tag name="monolog.logger" channel="ncr_search"/>
+    </service>
+
+    <service id="gdbots_ncr.ncr_search.elastica.client_manager" class="Gdbots\Ncr\Search\Elastica\ClientManager">
+      <argument>%gdbots_ncr.ncr_search.elastica.clusters%</argument>
+      <argument type="service" id="logger" on-invalid="ignore"/>
+      <tag name="monolog.logger" channel="ncr_search"/>
+    </service>
+
+    <service id="gdbots_ncr.ncr_search.elastica.index_manager" class="%gdbots_ncr.ncr_search.elastica.index_manager.class%">
+      <argument>%gdbots_ncr.ncr_search.elastica.index_manager.index_prefix%</argument>
+      <argument type="service" id="logger" on-invalid="ignore"/>
+      <tag name="monolog.logger" channel="ncr_search"/>
+    </service>
+    <!-- end: ncr search -->
+
   </services>
-  -->
 
 </container>

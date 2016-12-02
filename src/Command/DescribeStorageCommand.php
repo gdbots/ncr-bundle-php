@@ -2,10 +2,10 @@
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
-use Gdbots\Ncr\Repository\CanCreateRepositoryStorage;
+use Gdbots\Ncr\NcrAdmin;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageResolver;
-use Gdbots\Pbj\SchemaCurie;
+use Gdbots\Pbj\SchemaQName;
 use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -25,32 +25,30 @@ class DescribeStorageCommand extends ContainerAwareCommand
             ->setName('ncr:describe-storage')
             ->setDescription('Describes the NCR storage.')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command will describe the storage for the NCR.  If a curie is not provided
-it will run on all schemas having the mixin "gdbots:ncr:mixin:node".
-
-Each node schema (e.g. article, video, photo) can potentially have its own storage.
+The <info>%command.name%</info> command will describe the storage for the NCR.  If a SchemaQName is not 
+provided it will run on all schemas having the mixin "gdbots:ncr:mixin:node".
 
 <info>php %command.full_name% --hints='{"tenant_id":"client1"}' 'acme:article'</info>
 
 EOF
             )
             ->addOption(
-                'service-id-template',
+                'admin-service',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'The repository service id is derived from the qname using this template.',
-                '%vendor%_%message%_repository'
+                'The service id to load that implements Gdbots\Ncr\NcrAdmin',
+                'ncr'
             )
             ->addOption(
                 'hints',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Hints to provide to the repository describer (json).'
+                'Hints to provide to the NCR (json).'
             )
             ->addArgument(
                 'qname',
                 InputArgument::OPTIONAL,
-                'The qname of the node schema. e.g. "acme:article"'
+                'The SchemaQName of the node. e.g. "acme:article"'
             )
         ;
     }
@@ -65,25 +63,27 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $serviceIdTemplate = $input->getOption('service-id-template');
         $hints = json_decode($input->getOption('hints') ?: '{}', true);
-        $curie = $input->getArgument('curie');
+        $qname = $input->getArgument('qname');
 
         $container = $this->getContainer();
         $io = new SymfonyStyle($input, $output);
-        $io->title('Node Repository Storage Describer');
+        $io->title('NCR Storage Describer');
 
-        if (null === $curie) {
+        if (null === $qname) {
             $schemas = MessageResolver::findAllUsingMixin(NodeV1Mixin::create());
         } else {
             /** @var Message $class */
-            $class = MessageResolver::resolveCurie(SchemaCurie::fromString($curie));
+            $class = MessageResolver::resolveCurie(
+                MessageResolver::resolveQName(SchemaQName::fromString($qname))
+            );
             $schema = $class::schema();
+
             if (!$schema->hasMixin(NodeV1Mixin::create()->getId()->getCurieMajor())) {
                 throw new \InvalidArgumentException(
                     sprintf(
-                        'The curie [%s] does not have mixin [%s].',
-                        $curie,
+                        'The SchemaQName [%s] does not have mixin [%s].',
+                        $qname,
                         NodeV1Mixin::create()->getId()->getCurieMajor()
                     )
                 );
@@ -92,33 +92,28 @@ EOF
             $schemas = [$schema];
         }
 
-        foreach ($schemas as $schema) {
-            $curie = $schema->getCurie();
-            $serviceId = str_replace(
-                ['%vendor%', '%package%', '%message%'],
-                [$curie->getVendor(), $curie->getPackage(), $curie->getMessage()],
-                $serviceIdTemplate
+        $ncr = $container->get($input->getOption('admin-service'));
+        if (!$ncr instanceof NcrAdmin) {
+            throw new \LogicException(
+                sprintf(
+                    'The service [%s] using class [%s] must implement Gdbots\Ncr\NcrAdmin.',
+                    $input->getOption('admin-service'),
+                    get_class($ncr)
+                )
             );
+        }
 
-            if (!$container->has($serviceId)) {
-                $io->note(sprintf('Repository service for "%s" doesn\'t exist at "%s".', $curie, $serviceId));
-                continue;
-            }
-
-            $repository = $container->get($serviceId);
-            if (!$repository instanceof CanCreateRepositoryStorage) {
-                $io->note(sprintf('Repository service for "%s" doesn\'t implement CanCreateRepositoryStorage.', $curie));
-                continue;
-            }
+        foreach ($schemas as $schema) {
+            $qname = $schema->getQName();
 
             try {
-                $details = $repository->describeRepositoryStorage($hints);
-                $io->success(sprintf('Describing storage for "%s".', $curie));
+                $details = $ncr->describeStorage($qname, $hints);
+                $io->success(sprintf('Describing storage for "%s".', $qname));
                 $io->comment(sprintf('hints: %s', json_encode($hints)));
                 $io->text($details);
                 $io->newLine();
             } catch (\Exception $e) {
-                $io->error(sprintf('Failed to describe storage for "%s".', $curie));
+                $io->error(sprintf('Failed to describe storage for "%s".', $qname));
                 $io->text(get_class($e));
                 $io->text($e->getMessage());
                 $io->newLine();
