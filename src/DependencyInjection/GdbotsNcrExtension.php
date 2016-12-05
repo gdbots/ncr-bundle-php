@@ -20,8 +20,8 @@ class GdbotsNcrExtension extends Extension
         $configuration = new Configuration($container->getParameter('kernel.environment'));
 
         $config = $processor->processConfiguration($configuration, $config);
-echo json_encode($config, JSON_PRETTY_PRINT);
-exit;
+//echo json_encode($config, JSON_PRETTY_PRINT);
+//exit;
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
 
@@ -43,18 +43,20 @@ exit;
      */
     protected function configureDynamoDbNcr(array $config, ContainerBuilder $container, $provider)
     {
+        $service = 'gdbots_ncr.ncr.dynamodb';
+
         if (!isset($config['ncr']['dynamodb']) || 'dynamodb' !== $provider) {
-            $container->removeDefinition('gdbots_ncr.ncr.dynamodb');
+            $container->removeDefinition($service);
             return;
         }
 
-        $container->setParameter('gdbots_ncr.ncr.dynamodb.class', $config['ncr']['dynamodb']['class']);
-        if (isset($config['ncr']['dynamodb']['table_name'])) {
-            $container->setParameter(
-                'gdbots_ncr.ncr.dynamodb.table_name',
-                $config['ncr']['dynamodb']['table_name']
-            );
-        }
+        $dynamodb = $config['ncr']['dynamodb'];
+        $container->setParameter("{$service}.class", $dynamodb['class']);
+        $container->setParameter("{$service}.table_manager.class", $dynamodb['table_manager']['class']);
+        $container->setParameter("{$service}.table_manager.table_name_prefix", $dynamodb['table_manager']['table_name_prefix']);
+        $container->setParameter("{$service}.table_manager.node_tables", $dynamodb['table_manager']['node_tables']);
+
+        $container->setAlias('ncr', $service);
     }
 
     /**

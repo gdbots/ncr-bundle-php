@@ -13,8 +13,8 @@
     </service>
 
     <service id="gdbots_ncr.ncr.dynamodb.table_manager" class="%gdbots_ncr.ncr.dynamodb.table_manager.class%">
-      <argument>%gdbots_ncr.ncr.dynamodb.table_name_prefix%</argument>
-      <argument>%gdbots_ncr.ncr.dynamodb.node_tables%</argument>
+      <argument>%gdbots_ncr.ncr.dynamodb.table_manager.table_name_prefix%</argument>
+      <argument>%gdbots_ncr.ncr.dynamodb.table_manager.node_tables%</argument>
     </service>
     <!-- end: ncr -->
 

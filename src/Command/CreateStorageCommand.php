@@ -122,8 +122,12 @@ EOF
                 }
 
                 $io->error(sprintf('Failed to create storage for "%s".', $qname));
-                $io->text(get_class($e));
                 $io->text($e->getMessage());
+                if ($e->getPrevious()) {
+                    $io->newLine();
+                    $io->text($e->getPrevious()->getMessage());
+                }
+
                 $io->newLine();
             }
         }

@@ -114,8 +114,12 @@ EOF
                 $io->newLine();
             } catch (\Exception $e) {
                 $io->error(sprintf('Failed to describe storage for "%s".', $qname));
-                $io->text(get_class($e));
                 $io->text($e->getMessage());
+                if ($e->getPrevious()) {
+                    $io->newLine();
+                    $io->text($e->getPrevious()->getMessage());
+                }
+
                 $io->newLine();
             }
         }
