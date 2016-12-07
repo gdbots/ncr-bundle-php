@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 class GdbotsNcrExtension extends Extension
 {
     /**
-     * @param array $config
+     * @param array            $config
      * @param ContainerBuilder $container
      */
     public function load(array $config, ContainerBuilder $container)
@@ -20,9 +20,7 @@ class GdbotsNcrExtension extends Extension
         $configuration = new Configuration($container->getParameter('kernel.environment'));
 
         $config = $processor->processConfiguration($configuration, $config);
-//echo json_encode($config, JSON_PRETTY_PRINT);
-//exit;
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
 
         if (isset($config['ncr'])) {
@@ -37,9 +35,9 @@ class GdbotsNcrExtension extends Extension
     }
 
     /**
-     * @param array $config
+     * @param array            $config
      * @param ContainerBuilder $container
-     * @param string $provider
+     * @param string           $provider
      */
     protected function configureDynamoDbNcr(array $config, ContainerBuilder $container, $provider)
     {
@@ -47,6 +45,7 @@ class GdbotsNcrExtension extends Extension
 
         if (!isset($config['ncr']['dynamodb']) || 'dynamodb' !== $provider) {
             $container->removeDefinition($service);
+
             return;
         }
 
@@ -60,28 +59,29 @@ class GdbotsNcrExtension extends Extension
     }
 
     /**
-     * @param array $config
+     * @param array            $config
      * @param ContainerBuilder $container
-     * @param string $provider
+     * @param string           $provider
      */
     protected function configureElasticaNcrSearch(array $config, ContainerBuilder $container, $provider)
     {
+        $service = 'gdbots_ncr.ncr_search.elastica';
+
         if (!isset($config['ncr_search']['elastica']) || 'elastica' !== $provider) {
-            $container->removeDefinition('gdbots_ncr.ncr_search.elastica');
-            $container->removeDefinition('gdbots_ncr.ncr_search.elastica.client_manager');
-            $container->removeDefinition('gdbots_ncr.ncr_search.elastica.index_manager');
+            $container->removeDefinition($service);
+            $container->removeDefinition("{$service}.client_manager");
+            $container->removeDefinition("{$service}.index_manager");
+
             return;
         }
 
-        $container->setParameter('gdbots_ncr.ncr_search.elastica.class', $config['ncr_search']['elastica']['class']);
-        $container->setParameter('gdbots_ncr.ncr_search.elastica.index_manager.class', $config['ncr_search']['elastica']['index_manager']['class']);
-        if (isset($config['ncr_search']['elastica']['index_manager']['index_prefix'])) {
-            $container->setParameter(
-                'gdbots_ncr.ncr_search.elastica.index_manager.index_prefix',
-                $config['ncr_search']['elastica']['index_manager']['index_prefix']
-            );
-        }
-        $container->setParameter('gdbots_ncr.ncr_search.elastica.query_timeout', $config['ncr_search']['elastica']['query_timeout']);
-        $container->setParameter('gdbots_ncr.ncr_search.elastica.clusters', $config['ncr_search']['elastica']['clusters']);
+        $elastica = $config['ncr_search']['elastica'];
+        $container->setParameter("{$service}.class", $elastica['class']);
+        $container->setParameter("{$service}.index_manager.class", $elastica['index_manager']['class']);
+        $container->setParameter("{$service}.index_manager.index_prefix", $elastica['index_manager']['index_prefix']);
+        $container->setParameter("{$service}.query_timeout", $elastica['query_timeout']);
+        $container->setParameter("{$service}.clusters", $elastica['clusters']);
+
+        $container->setAlias('ncr_search', $service);
     }
 }

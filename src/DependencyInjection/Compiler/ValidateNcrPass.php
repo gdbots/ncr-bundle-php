@@ -1,0 +1,73 @@
+<?php
+
+namespace Gdbots\Bundle\NcrBundle\DependencyInjection\Compiler;
+
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+
+/**
+ * Checks the container to ensure that the NCR has the provider defined and that it's valid.
+ */
+class ValidateNcrPass implements CompilerPassInterface
+{
+    /**
+     * @param ContainerBuilder $container
+     */
+    public function process(ContainerBuilder $container)
+    {
+        if (!$container->hasParameter('gdbots_ncr.ncr.provider')) {
+            return;
+        }
+
+        $provider = $container->getParameter('gdbots_ncr.ncr.provider');
+        if (empty($provider)) {
+            return;
+        }
+
+        $this->ensureProviderExists($container, $provider);
+
+        switch ($provider) {
+            case 'dynamodb':
+                $this->validateDynamoDbProvider($container);
+                break;
+        }
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param string           $provider
+     *
+     * @throws \LogicException
+     */
+    private function ensureProviderExists(ContainerBuilder $container, $provider)
+    {
+        $serviceId = 'gdbots_ncr.ncr.' . $provider;
+        if ($container->hasDefinition($serviceId)) {
+            return;
+        }
+
+        throw new \LogicException(
+            sprintf(
+                'The "gdbots_ncr.ncr.provider" is configured to use "%s" which requires service "%s".',
+                $provider,
+                $serviceId
+            )
+        );
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     *
+     * @throws \LogicException
+     */
+    private function validateDynamoDbProvider(ContainerBuilder $container)
+    {
+        if (!$container->hasDefinition('aws.dynamodb')) {
+            throw new \LogicException(
+                'The service "gdbots_ncr.ncr.dynamodb" has a dependency on a non-existent ' .
+                'service "aws.dynamodb". This expects the DynamoDb Client that comes from ' .
+                'composer package "aws/aws-sdk-php-symfony": "~1.0".'
+            );
+        }
+    }
+}

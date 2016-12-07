@@ -4,15 +4,22 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
   <services>
+    <service id="gdbots_ncr.twig.ncr_extension" class="Gdbots\Bundle\NcrBundle\Twig\NcrExtension" public="false">
+      <argument type="service" id="service_container"/>
+      <argument type="service" id="logger" on-invalid="ignore"/>
+      <tag name="monolog.logger" channel="ncr"/>
+      <tag name="twig.extension"/>
+    </service>
+
     <!-- start: ncr -->
     <service id="gdbots_ncr.ncr.dynamodb" class="%gdbots_ncr.ncr.dynamodb.class%">
       <argument type="service" id="aws.dynamodb" on-invalid="ignore"/>
-      <argument type="service" id="gdbots_ncr.ncr.dynamodb.table_manager" on-invalid="ignore"/>
+      <argument type="service" id="gdbots_ncr.ncr.dynamodb.table_manager"/>
       <argument type="service" id="logger" on-invalid="ignore"/>
       <tag name="monolog.logger" channel="ncr"/>
     </service>
 
-    <service id="gdbots_ncr.ncr.dynamodb.table_manager" class="%gdbots_ncr.ncr.dynamodb.table_manager.class%">
+    <service id="gdbots_ncr.ncr.dynamodb.table_manager" class="%gdbots_ncr.ncr.dynamodb.table_manager.class%" public="false">
       <argument>%gdbots_ncr.ncr.dynamodb.table_manager.table_name_prefix%</argument>
       <argument>%gdbots_ncr.ncr.dynamodb.table_manager.node_tables%</argument>
     </service>
@@ -28,13 +35,13 @@
       <tag name="monolog.logger" channel="ncr_search"/>
     </service>
 
-    <service id="gdbots_ncr.ncr_search.elastica.client_manager" class="Gdbots\Ncr\Search\Elastica\ClientManager">
+    <service id="gdbots_ncr.ncr_search.elastica.client_manager" class="Gdbots\Ncr\Search\Elastica\ClientManager" public="false">
       <argument>%gdbots_ncr.ncr_search.elastica.clusters%</argument>
       <argument type="service" id="logger" on-invalid="ignore"/>
       <tag name="monolog.logger" channel="ncr_search"/>
     </service>
 
-    <service id="gdbots_ncr.ncr_search.elastica.index_manager" class="%gdbots_ncr.ncr_search.elastica.index_manager.class%">
+    <service id="gdbots_ncr.ncr_search.elastica.index_manager" class="%gdbots_ncr.ncr_search.elastica.index_manager.class%" public="false">
       <argument>%gdbots_ncr.ncr_search.elastica.index_manager.index_prefix%</argument>
       <argument type="service" id="logger" on-invalid="ignore"/>
       <tag name="monolog.logger" channel="ncr_search"/>
