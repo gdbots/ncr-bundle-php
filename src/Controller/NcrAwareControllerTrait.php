@@ -10,7 +10,7 @@ trait NcrAwareControllerTrait
     /**
      * @return Ncr
      */
-    protected function getNcr()
+    protected function getNcr(): Ncr
     {
         return $this->container->get('ncr');
     }
@@ -18,7 +18,7 @@ trait NcrAwareControllerTrait
     /**
      * @return NcrSearch
      */
-    protected function getNcrSearch()
+    protected function getNcrSearch(): NcrSearch
     {
         return $this->container->get('ncr_search');
     }
