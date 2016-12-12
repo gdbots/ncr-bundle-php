@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
@@ -55,12 +56,11 @@ EOF
                 'qname',
                 InputArgument::OPTIONAL,
                 'The SchemaQName of the node. e.g. "acme:article"'
-            )
-        ;
+            );
     }
 
     /**
-     * @param InputInterface $input
+     * @param InputInterface  $input
      * @param OutputInterface $output
      *
      * @return null

@@ -48,6 +48,12 @@
     </service>
     <!-- end: ncr search -->
 
+    <!-- start: binders -->
+    <service id="gdbots_ncr.node_command_binder" class="Gdbots\Ncr\Binder\NodeCommandBinder">
+      <tag name="pbjx.event_subscriber"/>
+    </service>
+    <!-- end: binders -->
+
   </services>
 
 </container>

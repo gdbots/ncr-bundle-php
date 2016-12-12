@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Twig;
 
@@ -45,5 +46,4 @@ class NcrExtension extends \Twig_Extension
     {
         return 'gdbots_ncr_extension';
     }
-
 }
