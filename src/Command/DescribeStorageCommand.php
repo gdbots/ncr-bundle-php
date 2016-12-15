@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
-use Gdbots\Ncr\NcrAdmin;
+use Gdbots\Ncr\Ncr;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\SchemaQName;
@@ -32,13 +32,6 @@ provided it will run on all schemas having the mixin "gdbots:ncr:mixin:node".
 <info>php %command.full_name% --hints='{"tenant_id":"client1"}' 'acme:article'</info>
 
 EOF
-            )
-            ->addOption(
-                'admin-service',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'The service id to load that implements Gdbots\Ncr\NcrAdmin',
-                'ncr'
             )
             ->addOption(
                 'hints',
@@ -92,16 +85,8 @@ EOF
             $schemas = [$schema];
         }
 
-        $ncr = $container->get($input->getOption('admin-service'));
-        if (!$ncr instanceof NcrAdmin) {
-            throw new \LogicException(
-                sprintf(
-                    'The service [%s] using class [%s] must implement Gdbots\Ncr\NcrAdmin.',
-                    $input->getOption('admin-service'),
-                    get_class($ncr)
-                )
-            );
-        }
+        /** @var Ncr $ncr */
+        $ncr = $container->get('ncr');
 
         foreach ($schemas as $schema) {
             $qname = $schema->getQName();
