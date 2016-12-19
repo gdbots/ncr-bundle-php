@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Gdbots\Bundle\NcrBundle\Command;
 
 use Gdbots\Ncr\Ncr;
+use Gdbots\Pbj\SchemaQName;
+use Gdbots\Schemas\Ncr\Mixin\Node\Node;
 use Gdbots\Schemas\Ncr\NodeRef;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,15 +40,25 @@ class NcrCommand extends ContainerAwareCommand
         /** @var Ncr $ncr */
         $ncr = $container->get('ncr');
 
+        $nodes = [];
+        $f = function (Node $node, NodeRef $nodeRef) use (&$nodes) {
+            $nodes[$nodeRef->toString()] = $node;
+        };
 
-        $nodeRefs = [
-            NodeRef::fromString('eme:account:1000'),
-            NodeRef::fromString('eme:account:2000'),
-            NodeRef::fromString('eme:account:3000'),
-            NodeRef::fromString('eme:account:4000'),
-            NodeRef::fromString('eme:user:abc'),
-        ];
+        $ncr->streamNodes(SchemaQName::fromString('eme:user'), $f, ['account_id' => 1000]);
 
-        $nodes = $ncr->getNodes($nodeRefs, true, ['account_id' => 1000]);
+        $nodeRefs = [];
+        foreach ($nodes as $nodeRef => $node) {
+            $nodeRefs[] = NodeRef::fromString($nodeRef);
+        }
+
+        echo json_encode($nodeRefs, JSON_PRETTY_PRINT);
+
+        $nodes = $ncr->getNodes($nodeRefs, false, ['account_id' => 1000]);
+
+        foreach ($nodes as $nodeRef => $node) {
+            echo $nodeRef . PHP_EOL;
+            echo json_encode($node, JSON_PRETTY_PRINT);
+        }
     }
 }
