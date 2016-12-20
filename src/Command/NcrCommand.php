@@ -45,7 +45,8 @@ class NcrCommand extends ContainerAwareCommand
             $nodes[$nodeRef->toString()] = $node;
         };
 
-        $ncr->streamNodes(SchemaQName::fromString('eme:user'), $f, ['account_id' => 1000]);
+        $ncr->streamNodes(SchemaQName::fromString('eme:user'), $f, ['account_id' => '1000']);
+        die(get_class($ncr));
 
         $nodeRefs = [];
         foreach ($nodes as $nodeRef => $node) {
@@ -54,11 +55,11 @@ class NcrCommand extends ContainerAwareCommand
 
         echo json_encode($nodeRefs, JSON_PRETTY_PRINT);
 
-        $nodes = $ncr->getNodes($nodeRefs, false, ['account_id' => 1000]);
+        $nodes = $ncr->getNodes($nodeRefs, false, ['account_id' => '1000']);
 
         foreach ($nodes as $nodeRef => $node) {
             echo $nodeRef . PHP_EOL;
-            echo json_encode($node, JSON_PRETTY_PRINT);
+            echo json_encode($node).PHP_EOL;
         }
     }
 }

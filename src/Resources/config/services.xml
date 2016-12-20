@@ -14,8 +14,7 @@
     <!-- start: ncr cache -->
     <service id="ncr_cache" class="Gdbots\Ncr\NcrCache">
       <argument type="service" id="pbjx"/>
-      <argument type="service" id="gdbots_ncr.ncr.dynamodb.table_manager"/>
-      <argument type="service" id="logger" on-invalid="ignore"/>
+      <argument>%gdbots_ncr.ncr_cache.max_items%</argument>
     </service>
 
     <service id="ncr_cache.loader" class="Gdbots\Ncr\NcrCacheLoader">
@@ -26,9 +25,16 @@
 
 
     <!-- start: ncr -->
+    <service id="gdbots_ncr.ncr.memoizing" class="Gdbots\Ncr\Repository\MemoizingNcr" decorates="ncr" decoration-priority="-1000" public="false">
+      <argument type="service" id="gdbots_ncr.ncr.memoizing.inner"/>
+      <argument type="service" id="ncr_cache"/>
+      <argument>%gdbots_ncr.ncr.memoizing.read_through%</argument>
+    </service>
+
     <service id="gdbots_ncr.ncr.dynamodb" class="%gdbots_ncr.ncr.dynamodb.class%">
       <argument type="service" id="aws.dynamodb" on-invalid="ignore"/>
       <argument type="service" id="gdbots_ncr.ncr.dynamodb.table_manager"/>
+      <argument>%gdbots_ncr.ncr.dynamodb.config%</argument>
       <argument type="service" id="logger" on-invalid="ignore"/>
       <tag name="monolog.logger" channel="ncr"/>
     </service>

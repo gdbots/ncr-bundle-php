@@ -24,15 +24,21 @@ class GdbotsNcrExtension extends Extension
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
 
-        if (isset($config['ncr'])) {
-            $container->setParameter('gdbots_ncr.ncr.provider', $config['ncr']['provider']);
-            $this->configureDynamoDbNcr($config, $container, $config['ncr']['provider']);
+        // ncr
+        $container->setParameter('gdbots_ncr.ncr.provider', $config['ncr']['provider']);
+        if ($config['ncr']['memoizing']['enabled']) {
+            $container->setParameter('gdbots_ncr.ncr.memoizing.read_through', $config['ncr']['memoizing']['read_through']);
+        } else {
+            $container->removeDefinition('gdbots_ncr.ncr.memoizing');
         }
+        $this->configureDynamoDbNcr($config, $container, $config['ncr']['provider']);
 
-        if (isset($config['ncr_search'])) {
-            $container->setParameter('gdbots_ncr.ncr_search.provider', $config['ncr_search']['provider']);
-            $this->configureElasticaNcrSearch($config, $container, $config['ncr_search']['provider']);
-        }
+        // ncr_cache
+        $container->setParameter('gdbots_ncr.ncr_cache.max_items', $config['ncr_cache']['max_items']);
+
+        // ncr_search
+        $container->setParameter('gdbots_ncr.ncr_search.provider', $config['ncr_search']['provider']);
+        $this->configureElasticaNcrSearch($config, $container, $config['ncr_search']['provider']);
     }
 
     /**
@@ -46,7 +52,6 @@ class GdbotsNcrExtension extends Extension
 
         if (!isset($config['ncr']['dynamodb']) || 'dynamodb' !== $provider) {
             $container->removeDefinition($service);
-
             return;
         }
 
@@ -55,6 +60,10 @@ class GdbotsNcrExtension extends Extension
         $container->setParameter("{$service}.table_manager.class", $dynamodb['table_manager']['class']);
         $container->setParameter("{$service}.table_manager.table_name_prefix", $dynamodb['table_manager']['table_name_prefix']);
         $container->setParameter("{$service}.table_manager.node_tables", $dynamodb['table_manager']['node_tables']);
+        $container->setParameter("{$service}.config", [
+            'batch_size' => $dynamodb['config']['batch_size'],
+            'pool_size' => $dynamodb['config']['pool_size'],
+        ]);
 
         $container->setAlias('ncr', $service);
     }
@@ -72,7 +81,6 @@ class GdbotsNcrExtension extends Extension
             $container->removeDefinition($service);
             $container->removeDefinition("{$service}.client_manager");
             $container->removeDefinition("{$service}.index_manager");
-
             return;
         }
 
