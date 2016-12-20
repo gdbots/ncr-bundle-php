@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
+use Gdbots\Bundle\PbjxBundle\Command\ConsumerTrait;
 use Gdbots\Ncr\Ncr;
 use Gdbots\Pbj\SchemaQName;
 use Gdbots\Schemas\Ncr\Mixin\Node\Node;
 use Gdbots\Schemas\Ncr\NodeRef;
+use Gdbots\Schemas\Ncr\Request\GetNodeBatchRequestV1;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -14,6 +16,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class NcrCommand extends ContainerAwareCommand
 {
+    use ConsumerTrait;
+
     /**
      * {@inheritdoc}
      */
@@ -39,27 +43,43 @@ class NcrCommand extends ContainerAwareCommand
 
         /** @var Ncr $ncr */
         $ncr = $container->get('ncr');
-
-        $nodes = [];
-        $f = function (Node $node, NodeRef $nodeRef) use (&$nodes) {
-            $nodes[$nodeRef->toString()] = $node;
-        };
-
-        $ncr->streamNodes(SchemaQName::fromString('eme:user'), $f, ['account_id' => '1000']);
-        die(get_class($ncr));
+        $pbjx = $this->getPbjx();
 
         $nodeRefs = [];
+        $f = function (NodeRef $nodeRef) use (&$nodeRefs) {
+            $nodeRefs[] = $nodeRef;
+        };
+
+        $this->createConsoleRequest();
+
+        $ncr->streamNodeRefs(SchemaQName::fromString('eme:user'), $f, ['account_id' => '1000']);
+
+        shuffle($nodeRefs);
+        $nodeRefs = array_slice($nodeRefs, 0, 5);
+
+        $request = GetNodeBatchRequestV1::create()
+            ->addToSet('node_refs', $nodeRefs)
+            ->addToMap('hints', 'account_id', '1000');
+        $nodes = $pbjx->request($request)->get('nodes');//$ncr->getNodes($nodeRefs, false, ['account_id' => '1000']);
+        usort($nodes, function (Node $a, Node $b) {
+            return strcmp($a->get('email'), $b->get('email'));
+        });
         foreach ($nodes as $nodeRef => $node) {
-            $nodeRefs[] = NodeRef::fromString($nodeRef);
+            //echo $nodeRef . PHP_EOL;
+            echo json_encode($node->get('_id') . ' => ' . $node->get('email')).PHP_EOL;
         }
 
-        echo json_encode($nodeRefs, JSON_PRETTY_PRINT);
+        echo str_repeat('=', 50).PHP_EOL;
 
-        $nodes = $ncr->getNodes($nodeRefs, false, ['account_id' => '1000']);
-
+        //$nodes = $ncr->getNodes($nodeRefs, false, ['account_id' => '1000']);
+        $request = clone $request;
+        $nodes = $pbjx->request($request)->get('nodes');//$ncr->getNodes($nodeRefs, false, ['account_id' => '1000']);
+        usort($nodes, function (Node $a, Node $b) {
+            return strcmp($a->get('email'), $b->get('email'));
+        });
         foreach ($nodes as $nodeRef => $node) {
-            echo $nodeRef . PHP_EOL;
-            echo json_encode($node).PHP_EOL;
+            //echo $nodeRef . PHP_EOL;
+            echo json_encode($node->get('_id') . ' => ' . $node->get('email')).PHP_EOL;
         }
     }
 }
