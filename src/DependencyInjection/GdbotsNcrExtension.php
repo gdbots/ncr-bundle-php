@@ -52,6 +52,7 @@ class GdbotsNcrExtension extends Extension
 
         if (!isset($config['ncr']['dynamodb']) || 'dynamodb' !== $provider) {
             $container->removeDefinition($service);
+            $container->removeDefinition("{$service}.table_manager");
             return;
         }
 

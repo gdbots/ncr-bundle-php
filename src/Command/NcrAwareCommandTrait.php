@@ -1,20 +1,24 @@
 <?php
 declare(strict_types=1);
 
-namespace Gdbots\Bundle\NcrBundle\Controller;
+namespace Gdbots\Bundle\NcrBundle\Command;
 
 use Gdbots\Ncr\Ncr;
 use Gdbots\Ncr\NcrCache;
 use Gdbots\Ncr\NcrSearch;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-trait NcrAwareControllerTrait
+/**
+ * @method ContainerInterface getContainer()
+ */
+trait NcrAwareCommandTrait
 {
     /**
      * @return Ncr
      */
     protected function getNcr(): Ncr
     {
-        return $this->container->get('ncr');
+        return $this->getContainer()->get('ncr');
     }
 
     /**
@@ -22,7 +26,7 @@ trait NcrAwareControllerTrait
      */
     protected function getNcrCache(): NcrCache
     {
-        return $this->container->get('ncr_cache');
+        return $this->getContainer()->get('ncr_cache');
     }
 
     /**
@@ -30,6 +34,6 @@ trait NcrAwareControllerTrait
      */
     protected function getNcrSearch(): NcrSearch
     {
-        return $this->container->get('ncr_search');
+        return $this->getContainer()->get('ncr_search');
     }
 }

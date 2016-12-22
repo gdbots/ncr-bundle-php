@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
-use Gdbots\Bundle\PbjxBundle\Command\ConsumerTrait;
-use Gdbots\Ncr\Ncr;
+use Gdbots\Bundle\PbjxBundle\Command\PbjxAwareCommandTrait;
 use Gdbots\Pbj\SchemaQName;
 use Gdbots\Schemas\Ncr\Mixin\Node\Node;
 use Gdbots\Schemas\Ncr\NodeRef;
@@ -16,7 +15,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class NcrCommand extends ContainerAwareCommand
 {
-    use ConsumerTrait;
+    use NcrAwareCommandTrait;
+    use PbjxAwareCommandTrait;
 
     /**
      * {@inheritdoc}
@@ -37,12 +37,10 @@ class NcrCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $container = $this->getContainer();
         $io = new SymfonyStyle($input, $output);
         $io->title('NCR Test');
 
-        /** @var Ncr $ncr */
-        $ncr = $container->get('ncr');
+        $ncr = $this->getNcr();
         $pbjx = $this->getPbjx();
 
         $nodeRefs = [];
