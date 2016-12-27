@@ -8,6 +8,7 @@
     "php": ">=7.1",
     "gdbots/ncr": "dev-beta as 0.1.0",
     "gdbots/pbjx": "dev-es as 1.0.0",
+    "gdbots/pbjx-bundle": "dev-beta as dev-master",
     "gdbots/schemas": "dev-es as 1.0.0",
     "symfony/symfony": "~3.2"
   },
