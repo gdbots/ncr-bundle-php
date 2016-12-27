@@ -5,6 +5,7 @@ namespace Gdbots\Bundle\NcrBundle\Command;
 
 use Gdbots\Ncr\Ncr;
 use Gdbots\Ncr\NcrCache;
+use Gdbots\Ncr\NcrLazyLoader;
 use Gdbots\Ncr\NcrSearch;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -27,6 +28,14 @@ trait NcrAwareCommandTrait
     protected function getNcrCache(): NcrCache
     {
         return $this->getContainer()->get('ncr_cache');
+    }
+
+    /**
+     * @return NcrLazyLoader
+     */
+    protected function getNcrLazyLoader(): NcrLazyLoader
+    {
+        return $this->getContainer()->get('ncr_lazy_loader');
     }
 
     /**

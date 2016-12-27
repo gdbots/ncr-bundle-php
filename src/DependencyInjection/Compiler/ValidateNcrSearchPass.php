@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\DependencyInjection\Compiler;
 
@@ -36,13 +37,13 @@ class ValidateNcrSearchPass implements CompilerPassInterface
 
     /**
      * @param ContainerBuilder $container
-     * @param string $provider
+     * @param string           $provider
      *
      * @throws \LogicException
      */
-    private function ensureProviderExists(ContainerBuilder $container, $provider)
+    private function ensureProviderExists(ContainerBuilder $container, string $provider): void
     {
-        $serviceId = 'gdbots_ncr.ncr_search.'.$provider;
+        $serviceId = "gdbots_ncr.ncr_search.{$provider}";
         if ($container->hasDefinition($serviceId)) {
             return;
         }

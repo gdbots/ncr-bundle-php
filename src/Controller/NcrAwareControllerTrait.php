@@ -5,6 +5,7 @@ namespace Gdbots\Bundle\NcrBundle\Controller;
 
 use Gdbots\Ncr\Ncr;
 use Gdbots\Ncr\NcrCache;
+use Gdbots\Ncr\NcrLazyLoader;
 use Gdbots\Ncr\NcrSearch;
 
 trait NcrAwareControllerTrait
@@ -23,6 +24,14 @@ trait NcrAwareControllerTrait
     protected function getNcrCache(): NcrCache
     {
         return $this->container->get('ncr_cache');
+    }
+
+    /**
+     * @return NcrLazyLoader
+     */
+    protected function getNcrLazyLoader(): NcrLazyLoader
+    {
+        return $this->container->get('ncr_lazy_loader');
     }
 
     /**

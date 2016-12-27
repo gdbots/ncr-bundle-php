@@ -7,6 +7,7 @@ use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 class GdbotsNcrExtension extends Extension
@@ -31,6 +32,7 @@ class GdbotsNcrExtension extends Extension
         } else {
             $container->removeDefinition('gdbots_ncr.ncr.memoizing');
         }
+        $this->configurePsr6Ncr($config, $container);
         $this->configureDynamoDbNcr($config, $container, $config['ncr']['provider']);
 
         // ncr_cache
@@ -44,9 +46,31 @@ class GdbotsNcrExtension extends Extension
     /**
      * @param array            $config
      * @param ContainerBuilder $container
+     */
+    protected function configurePsr6Ncr(array $config, ContainerBuilder $container): void
+    {
+        $service = 'gdbots_ncr.ncr.psr6';
+        $psr6 = $config['ncr']['psr6'];
+
+        if (!$psr6['enabled']) {
+            $container->removeDefinition($service);
+            return;
+        }
+
+        $container->setParameter("{$service}.class", $psr6['class']);
+        $container->setParameter("{$service}.read_through", $psr6['read_through']);
+
+        if (isset($psr6['provider'])) {
+            $container->getDefinition($service)->replaceArgument(1, new Reference($psr6['provider']));
+        }
+    }
+
+    /**
+     * @param array            $config
+     * @param ContainerBuilder $container
      * @param string           $provider
      */
-    protected function configureDynamoDbNcr(array $config, ContainerBuilder $container, $provider)
+    protected function configureDynamoDbNcr(array $config, ContainerBuilder $container, ?string $provider): void
     {
         $service = 'gdbots_ncr.ncr.dynamodb';
 
@@ -74,7 +98,7 @@ class GdbotsNcrExtension extends Extension
      * @param ContainerBuilder $container
      * @param string           $provider
      */
-    protected function configureElasticaNcrSearch(array $config, ContainerBuilder $container, $provider)
+    protected function configureElasticaNcrSearch(array $config, ContainerBuilder $container, ?string $provider): void
     {
         $service = 'gdbots_ncr.ncr_search.elastica';
 

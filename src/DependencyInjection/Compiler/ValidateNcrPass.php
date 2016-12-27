@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\DependencyInjection\Compiler;
 
@@ -39,9 +40,9 @@ class ValidateNcrPass implements CompilerPassInterface
      *
      * @throws \LogicException
      */
-    private function ensureProviderExists(ContainerBuilder $container, $provider)
+    private function ensureProviderExists(ContainerBuilder $container, string $provider): void
     {
-        $serviceId = 'gdbots_ncr.ncr.' . $provider;
+        $serviceId = "gdbots_ncr.ncr.{$provider}";
         if ($container->hasDefinition($serviceId)) {
             return;
         }
@@ -60,7 +61,7 @@ class ValidateNcrPass implements CompilerPassInterface
      *
      * @throws \LogicException
      */
-    private function validateDynamoDbProvider(ContainerBuilder $container)
+    private function validateDynamoDbProvider(ContainerBuilder $container): void
     {
         if (!$container->hasDefinition('aws.dynamodb')) {
             throw new \LogicException(

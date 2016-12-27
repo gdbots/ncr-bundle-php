@@ -71,7 +71,7 @@ class NcrCommand extends ContainerAwareCommand
 
         //$nodes = $ncr->getNodes($nodeRefs, false, ['account_id' => '1000']);
         $request = clone $request;
-        $nodes = $pbjx->request($request)->get('nodes');//$ncr->getNodes($nodeRefs, false, ['account_id' => '1000']);
+        $nodes = $pbjx->request($request)->get('nodes', []);//$ncr->getNodes($nodeRefs, false, ['account_id' => '1000']);
         usort($nodes, function (Node $a, Node $b) {
             return strcmp($a->get('email'), $b->get('email'));
         });

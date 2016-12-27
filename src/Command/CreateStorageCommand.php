@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
-use Gdbots\Ncr\Ncr;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\SchemaQName;
@@ -17,6 +16,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class CreateStorageCommand extends ContainerAwareCommand
 {
+    use NcrAwareCommandTrait;
+
     /**
      * {@inheritdoc}
      */
@@ -66,7 +67,6 @@ EOF
         $hints = json_decode($input->getOption('hints') ?: '{}', true);
         $qname = $input->getArgument('qname');
 
-        $container = $this->getContainer();
         $io = new SymfonyStyle($input, $output);
         $io->title('NCR Storage Creator');
 
@@ -92,8 +92,7 @@ EOF
             $schemas = [$schema];
         }
 
-        /** @var Ncr $ncr */
-        $ncr = $container->get('ncr');
+        $ncr = $this->getNcr();
 
         foreach ($schemas as $schema) {
             $qname = $schema->getQName();
