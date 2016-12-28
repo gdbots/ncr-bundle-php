@@ -14,7 +14,7 @@ class Configuration implements ConfigurationInterface
     /**
      * @param string $env
      */
-    public function __construct($env = 'dev')
+    public function __construct(string $env = 'dev')
     {
         $this->env = $env;
     }
@@ -96,7 +96,7 @@ class Configuration implements ConfigurationInterface
     /**
      * @return NodeDefinition
      */
-    protected function getDynamoDbNcrConfigTree()
+    protected function getDynamoDbNcrConfigTree(): NodeDefinition
     {
         $treeBuilder = new TreeBuilder();
         $node = $treeBuilder->root('dynamodb');
@@ -151,7 +151,7 @@ class Configuration implements ConfigurationInterface
     /**
      * @return NodeDefinition
      */
-    protected function getElasticaNcrSearchConfigTree()
+    protected function getElasticaNcrSearchConfigTree(): NodeDefinition
     {
         $treeBuilder = new TreeBuilder();
         $node = $treeBuilder->root('elastica');
@@ -160,11 +160,11 @@ class Configuration implements ConfigurationInterface
         $defaultCluster = [
             'default' => [
                 'round_robin' => true,
-                'timeout' => 300,
-                'debug' => false,
-                'persistent' => true,
-                'servers' => $defaultServers
-            ]
+                'timeout'     => 300,
+                'debug'       => false,
+                'persistent'  => true,
+                'servers'     => $defaultServers,
+            ],
         ];
 
         $node
