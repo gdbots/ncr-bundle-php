@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
@@ -64,10 +64,10 @@ class NcrCommand extends ContainerAwareCommand
         });
         foreach ($nodes as $nodeRef => $node) {
             //echo $nodeRef . PHP_EOL;
-            echo json_encode($node->get('_id') . ' => ' . $node->get('email')).PHP_EOL;
+            echo json_encode($node->get('_id') . ' => ' . $node->get('email')) . PHP_EOL;
         }
 
-        echo str_repeat('=', 50).PHP_EOL;
+        echo str_repeat('=', 50) . PHP_EOL;
 
         //$nodes = $ncr->getNodes($nodeRefs, false, ['account_id' => '1000']);
         $request = clone $request;
@@ -77,7 +77,7 @@ class NcrCommand extends ContainerAwareCommand
         });
         foreach ($nodes as $nodeRef => $node) {
             //echo $nodeRef . PHP_EOL;
-            echo json_encode($node->get('_id') . ' => ' . $node->get('email')).PHP_EOL;
+            echo json_encode($node->get('_id') . ' => ' . $node->get('email')) . PHP_EOL;
         }
     }
 }

@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
-use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
+use Gdbots\Schemas\Ncr\Mixin\Indexed\IndexedV1Mixin;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,7 +11,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class CreateStorageCommand extends ContainerAwareCommand
+class DescribeSearchStorageCommand extends ContainerAwareCommand
 {
     use NcrAwareCommandTrait;
 
@@ -21,21 +21,15 @@ class CreateStorageCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('ncr:create-storage')
-            ->setDescription('Creates the NCR storage.')
+            ->setName('ncr:describe-search-storage')
+            ->setDescription('Describes the NCR Search storage.')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command will create the storage for the NCR.  If a SchemaQName is not 
-provided it will run on all schemas having the mixin "gdbots:ncr:mixin:node".
+The <info>%command.name%</info> command will describe the search storage for the NCR.
+If a SchemaQName is not provided it will run on all schemas having the mixin "gdbots:ncr:mixin:node".
 
 <info>php %command.full_name% --hints='{"tenant_id":"client1"}' 'acme:article'</info>
 
 EOF
-            )
-            ->addOption(
-                'skip-errors',
-                null,
-                InputOption::VALUE_NONE,
-                'Skip any schemas that fail to create.'
             )
             ->addOption(
                 'hints',
@@ -60,25 +54,23 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $skipErrors = $input->getOption('skip-errors');
         $hints = json_decode($input->getOption('hints') ?: '{}', true);
 
         $io = new SymfonyStyle($input, $output);
-        $io->title('NCR Storage Creator');
-        $ncr = $this->getNcr();
+        $io->title('NCR Search Storage Describer');
+        $ncrSearch = $this->getNcrSearch();
 
-        foreach ($this->getSchemas(NodeV1Mixin::create(), $input->getArgument('qname')) as $schema) {
+        foreach ($this->getSchemas(IndexedV1Mixin::create(), $input->getArgument('qname')) as $schema) {
             $qname = $schema->getQName();
 
             try {
-                $ncr->createStorage($qname, $hints);
-                $io->success(sprintf('Created storage for "%s".', $qname));
+                $details = $ncrSearch->describeStorage($qname, $hints);
+                $io->success(sprintf('Describing search storage for "%s".', $qname));
+                $io->comment(sprintf('hints: %s', json_encode($hints)));
+                $io->text($details);
+                $io->newLine();
             } catch (\Exception $e) {
-                if (!$skipErrors) {
-                    throw $e;
-                }
-
-                $io->error(sprintf('Failed to create storage for "%s".', $qname));
+                $io->error(sprintf('Failed to describe search storage for "%s".', $qname));
                 $io->text($e->getMessage());
                 if ($e->getPrevious()) {
                     $io->newLine();

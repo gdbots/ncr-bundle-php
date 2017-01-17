@@ -1,11 +1,8 @@
 <?php
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
-use Gdbots\Pbj\Message;
-use Gdbots\Pbj\MessageResolver;
-use Gdbots\Pbj\SchemaQName;
 use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -58,36 +55,12 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $hints = json_decode($input->getOption('hints') ?: '{}', true);
-        $qname = $input->getArgument('qname');
 
         $io = new SymfonyStyle($input, $output);
         $io->title('NCR Storage Describer');
-
-        if (null === $qname) {
-            $schemas = MessageResolver::findAllUsingMixin(NodeV1Mixin::create());
-        } else {
-            /** @var Message $class */
-            $class = MessageResolver::resolveCurie(
-                MessageResolver::resolveQName(SchemaQName::fromString($qname))
-            );
-            $schema = $class::schema();
-
-            if (!$schema->hasMixin(NodeV1Mixin::create()->getId()->getCurieMajor())) {
-                throw new \InvalidArgumentException(
-                    sprintf(
-                        'The SchemaQName [%s] does not have mixin [%s].',
-                        $qname,
-                        NodeV1Mixin::create()->getId()->getCurieMajor()
-                    )
-                );
-            }
-
-            $schemas = [$schema];
-        }
-
         $ncr = $this->getNcr();
 
-        foreach ($schemas as $schema) {
+        foreach ($this->getSchemas(NodeV1Mixin::create(), $input->getArgument('qname')) as $schema) {
             $qname = $schema->getQName();
 
             try {

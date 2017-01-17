@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\DependencyInjection;
 
+use Elastica\JSON;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -110,9 +111,15 @@ class GdbotsNcrExtension extends Extension
         }
 
         $elastica = $config['ncr_search']['elastica'];
+
+        echo json_encode($elastica, JSON_PRETTY_PRINT);
+        //exit;
+
         $container->setParameter("{$service}.class", $elastica['class']);
         $container->setParameter("{$service}.index_manager.class", $elastica['index_manager']['class']);
         $container->setParameter("{$service}.index_manager.index_prefix", $elastica['index_manager']['index_prefix']);
+        $container->setParameter("{$service}.index_manager.indexes", $elastica['index_manager']['indexes']);
+        $container->setParameter("{$service}.index_manager.types", $elastica['index_manager']['types']);
         $container->setParameter("{$service}.query_timeout", $elastica['query_timeout']);
         $container->setParameter("{$service}.clusters", $elastica['clusters']);
 
