@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Gdbots\Bundle\NcrBundle\DependencyInjection;
 
@@ -192,7 +192,7 @@ class Configuration implements ConfigurationInterface
                                 ->performNoDeepMerging()
                                 ->children()
                                     ->integerNode('number_of_shards')
-                                        ->defaultValue(1)
+                                        ->defaultValue(5)
                                     ->end()
                                     ->integerNode('number_of_replicas')
                                         ->defaultValue(1)

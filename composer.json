@@ -14,7 +14,9 @@
   },
   "require-dev": {
     "composer/composer": "1.0.*@dev",
-    "phpunit/phpunit": "~4.3"
+    "phpunit/phpunit": "~4.3",
+    "aws/aws-sdk-php": "~3.21",
+    "ruflin/elastica": "~3.2"
   },
   "autoload": {
     "psr-4": {

@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Gdbots\Bundle\NcrBundle\Twig;
 
@@ -81,7 +81,7 @@ class NcrExtension extends \Twig_Extension
 
         try {
             if (!$nodeRef instanceof NodeRef) {
-                $nodeRef = NodeRef::fromString((string)$nodeRef);
+                $nodeRef = NodeRef::fromString((string) $nodeRef);
             }
 
             return $this->getNcrCache()->getNode($nodeRef);
@@ -97,7 +97,7 @@ class NcrExtension extends \Twig_Extension
                     '%s::Unable to process twig "ncr_get_node" function for [{node_ref}].',
                     ClassUtils::getShortName($e)
                 ),
-                ['exception' => $e, 'node_ref' => (string)$nodeRef]
+                ['exception' => $e, 'node_ref' => (string) $nodeRef]
             );
         }
 

@@ -22,12 +22,12 @@ class CreateStorageCommand extends ContainerAwareCommand
     {
         $this
             ->setName('ncr:create-storage')
-            ->setDescription('Creates the NCR storage.')
+            ->setDescription('Creates the Ncr storage.')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command will create the storage for the NCR.  If a SchemaQName is not 
-provided it will run on all schemas having the mixin "gdbots:ncr:mixin:node".
+The <info>%command.name%</info> command will create the storage for the Ncr.  
+If a SchemaQName is not provided it will run on all schemas having the mixin "gdbots:ncr:mixin:node".
 
-<info>php %command.full_name% --hints='{"tenant_id":"client1"}' 'acme:article'</info>
+<info>php %command.full_name% --tenant-id=client1 'acme:article'</info>
 
 EOF
             )
@@ -38,10 +38,16 @@ EOF
                 'Skip any schemas that fail to create.'
             )
             ->addOption(
-                'hints',
+                'tenant-id',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Hints to provide to the NCR (json).'
+                'Tenant Id to use for this operation.'
+            )
+            ->addOption(
+                'context',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Context to provide to the NcrSearch (json).'
             )
             ->addArgument(
                 'qname',
@@ -61,24 +67,25 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $skipErrors = $input->getOption('skip-errors');
-        $hints = json_decode($input->getOption('hints') ?: '{}', true);
+        $context = json_decode($input->getOption('context') ?: '{}', true);
+        $context['tenant_id'] = $input->getOption('tenant-id');
 
         $io = new SymfonyStyle($input, $output);
-        $io->title('NCR Storage Creator');
+        $io->title('Ncr Storage Creator');
         $ncr = $this->getNcr();
 
-        foreach ($this->getSchemas(NodeV1Mixin::create(), $input->getArgument('qname')) as $schema) {
+        foreach ($this->getSchemasUsingMixin(NodeV1Mixin::create(), $input->getArgument('qname')) as $schema) {
             $qname = $schema->getQName();
 
             try {
-                $ncr->createStorage($qname, $hints);
-                $io->success(sprintf('Created storage for "%s".', $qname));
+                $ncr->createStorage($qname, $context);
+                $io->success(sprintf('Created Ncr storage for "%s".', $qname));
             } catch (\Exception $e) {
                 if (!$skipErrors) {
                     throw $e;
                 }
 
-                $io->error(sprintf('Failed to create storage for "%s".', $qname));
+                $io->error(sprintf('Failed to create Ncr storage for "%s".', $qname));
                 $io->text($e->getMessage());
                 if ($e->getPrevious()) {
                     $io->newLine();

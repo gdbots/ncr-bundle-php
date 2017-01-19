@@ -1,9 +1,8 @@
 <?php
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Gdbots\Bundle\NcrBundle\DependencyInjection;
 
-use Elastica\JSON;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -88,7 +87,7 @@ class GdbotsNcrExtension extends Extension
         $container->setParameter("{$service}.table_manager.node_tables", $dynamodb['table_manager']['node_tables']);
         $container->setParameter("{$service}.config", [
             'batch_size' => $dynamodb['config']['batch_size'],
-            'pool_size' => $dynamodb['config']['pool_size'],
+            'pool_size'  => $dynamodb['config']['pool_size'],
         ]);
 
         $container->setAlias('ncr', $service);
@@ -111,10 +110,6 @@ class GdbotsNcrExtension extends Extension
         }
 
         $elastica = $config['ncr_search']['elastica'];
-
-        echo json_encode($elastica, JSON_PRETTY_PRINT);
-        //exit;
-
         $container->setParameter("{$service}.class", $elastica['class']);
         $container->setParameter("{$service}.index_manager.class", $elastica['index_manager']['class']);
         $container->setParameter("{$service}.index_manager.index_prefix", $elastica['index_manager']['index_prefix']);

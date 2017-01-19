@@ -22,20 +22,26 @@ class DescribeSearchStorageCommand extends ContainerAwareCommand
     {
         $this
             ->setName('ncr:describe-search-storage')
-            ->setDescription('Describes the NCR Search storage.')
+            ->setDescription('Describes the NcrSearch storage.')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command will describe the search storage for the NCR.
-If a SchemaQName is not provided it will run on all schemas having the mixin "gdbots:ncr:mixin:node".
+The <info>%command.name%</info> command will describe the storage for the NcrSearch.  
+If a SchemaQName is not provided it will run on all schemas having the mixin "gdbots:ncr:mixin:indexed".
 
-<info>php %command.full_name% --hints='{"tenant_id":"client1"}' 'acme:article'</info>
+<info>php %command.full_name% --tenant-id=client1 'acme:article'</info>
 
 EOF
             )
             ->addOption(
-                'hints',
+                'tenant-id',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Hints to provide to the NCR (json).'
+                'Tenant Id to use for this operation.'
+            )
+            ->addOption(
+                'context',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Context to provide to the NcrSearch (json).'
             )
             ->addArgument(
                 'qname',
@@ -54,23 +60,24 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $hints = json_decode($input->getOption('hints') ?: '{}', true);
+        $context = json_decode($input->getOption('context') ?: '{}', true);
+        $context['tenant_id'] = $input->getOption('tenant-id');
 
         $io = new SymfonyStyle($input, $output);
-        $io->title('NCR Search Storage Describer');
+        $io->title('NcrSearch Storage Describer');
         $ncrSearch = $this->getNcrSearch();
 
-        foreach ($this->getSchemas(IndexedV1Mixin::create(), $input->getArgument('qname')) as $schema) {
+        foreach ($this->getSchemasUsingMixin(IndexedV1Mixin::create(), $input->getArgument('qname')) as $schema) {
             $qname = $schema->getQName();
 
             try {
-                $details = $ncrSearch->describeStorage($qname, $hints);
-                $io->success(sprintf('Describing search storage for "%s".', $qname));
-                $io->comment(sprintf('hints: %s', json_encode($hints)));
+                $details = $ncrSearch->describeStorage($qname, $context);
+                $io->success(sprintf('Describing NcrSearch storage for "%s".', $qname));
+                $io->comment(sprintf('context: %s', json_encode($context)));
                 $io->text($details);
                 $io->newLine();
             } catch (\Exception $e) {
-                $io->error(sprintf('Failed to describe search storage for "%s".', $qname));
+                $io->error(sprintf('Failed to describe NcrSearch storage for "%s".', $qname));
                 $io->text($e->getMessage());
                 if ($e->getPrevious()) {
                     $io->newLine();
