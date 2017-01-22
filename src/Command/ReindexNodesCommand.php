@@ -26,7 +26,7 @@ class ReindexNodesCommand extends ContainerAwareCommand
             ->setName('ncr:reindex-nodes')
             ->setDescription('Streams nodes from the Ncr and reindexes them.')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command will stream nodes from the Ncr for the given 
+The <info>%command.name%</info> command will pipe nodes from the Ncr for the given 
 SchemaQName if provided or all schemas having the mixin "gdbots:ncr:mixin:indexed" and 
 write the json value of the node on one line (json newline delimited) to STDOUT.
 
@@ -38,7 +38,7 @@ EOF
                 'batch-size',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Number of nodes to export at a time.',
+                'Number of nodes to reindex at a time.',
                 100
             )
             ->addOption(
@@ -90,7 +90,7 @@ EOF
         $output->writeln('coming soon');
 
         /*
-        $callback = function (Node $node) use ($errOutput, $batchSize, $batchDelay, &$i) {
+        $receiver = function (Node $node) use ($errOutput, $batchSize, $batchDelay, &$i) {
             ++$i;
 
             try {
@@ -107,7 +107,7 @@ EOF
         };
 
         foreach ($this->getSchemasUsingMixin(NodeV1Mixin::create(), $input->getArgument('qname')) as $schema) {
-            $ncr->streamNodes($schema->getQName(), $callback, $context);
+            $ncr->pipeNodes($schema->getQName(), $receiver, $context);
         }
         */
     }

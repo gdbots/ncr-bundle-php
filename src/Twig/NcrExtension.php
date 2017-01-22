@@ -13,19 +13,16 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class NcrExtension extends \Twig_Extension
+final class NcrExtension extends \Twig_Extension
 {
     /** @var ContainerInterface */
-    protected $container;
+    private $container;
 
     /** @var LoggerInterface */
-    protected $logger;
-
-    /** @var NcrCache */
-    protected $ncrCache;
+    private $logger;
 
     /** @var bool */
-    protected $debug = false;
+    private $debug = false;
 
     /**
      * @param ContainerInterface $container
@@ -107,12 +104,8 @@ class NcrExtension extends \Twig_Extension
     /**
      * @return NcrCache
      */
-    protected function getNcrCache(): NcrCache
+    private function getNcrCache(): NcrCache
     {
-        if (null === $this->ncrCache) {
-            $this->ncrCache = $this->container->get('ncr_cache');
-        }
-
-        return $this->ncrCache;
+        return $this->container->get('ncr_cache');
     }
 }
