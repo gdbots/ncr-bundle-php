@@ -228,6 +228,7 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue($defaultCluster)
                     ->prototype('array')
                         ->fixXmlConfig('server')
+                        ->addDefaultsIfNotSet()
                         ->performNoDeepMerging()
                         ->children()
                             ->booleanNode('round_robin')
