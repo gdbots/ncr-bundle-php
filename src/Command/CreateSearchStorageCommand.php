@@ -38,16 +38,16 @@ EOF
                 'Skip any schemas that fail to create.'
             )
             ->addOption(
-                'tenant-id',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Tenant Id to use for this operation.'
-            )
-            ->addOption(
                 'context',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Context to provide to the NcrSearch (json).'
+            )
+            ->addOption(
+                'tenant-id',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Tenant Id to use for this operation.'
             )
             ->addArgument(
                 'qname',

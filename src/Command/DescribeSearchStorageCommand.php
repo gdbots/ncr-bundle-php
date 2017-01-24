@@ -32,16 +32,16 @@ If a SchemaQName is not provided it will run on all schemas having the mixin "gd
 EOF
             )
             ->addOption(
-                'tenant-id',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Tenant Id to use for this operation.'
-            )
-            ->addOption(
                 'context',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Context to provide to the NcrSearch (json).'
+            )
+            ->addOption(
+                'tenant-id',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Tenant Id to use for this operation.'
             )
             ->addArgument(
                 'qname',

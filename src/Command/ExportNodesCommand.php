@@ -49,16 +49,16 @@ EOF
                 1000
             )
             ->addOption(
-                'tenant-id',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Tenant Id to use for this operation.'
-            )
-            ->addOption(
                 'context',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Context to provide to the Ncr (json).'
+            )
+            ->addOption(
+                'tenant-id',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Tenant Id to use for this operation.'
             )
             ->addArgument(
                 'qname',

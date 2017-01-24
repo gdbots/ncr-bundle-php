@@ -24,7 +24,7 @@ class ReindexNodesCommand extends ContainerAwareCommand
     {
         $this
             ->setName('ncr:reindex-nodes')
-            ->setDescription('Streams nodes from the Ncr and reindexes them.')
+            ->setDescription('Pipes nodes from the Ncr and reindexes them.')
             ->setHelp(<<<EOF
 The <info>%command.name%</info> command will pipe nodes from the Ncr for the given 
 SchemaQName if provided or all schemas having the mixin "gdbots:ncr:mixin:indexed" and 
@@ -49,16 +49,16 @@ EOF
                 1000
             )
             ->addOption(
-                'tenant-id',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Tenant Id to use for this operation.'
-            )
-            ->addOption(
                 'context',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Context to provide to the Ncr (json).'
+            )
+            ->addOption(
+                'tenant-id',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Tenant Id to use for this operation.'
             )
             ->addArgument(
                 'qname',

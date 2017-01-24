@@ -24,7 +24,7 @@ trait NcrAwareCommandTrait
      *
      * @return bool
      */
-    protected function readyForNcrTraffic(SymfonyStyle $io, $message = 'Aborting read of nodes.'): bool
+    protected function readyForNcrTraffic(SymfonyStyle $io, string $message = 'Aborting read of nodes.'): bool
     {
         $container = $this->getContainer();
         $question = sprintf(
