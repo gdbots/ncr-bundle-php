@@ -82,7 +82,7 @@ EOF
         $batchSize = NumberUtils::bound($input->getOption('batch-size'), 1, 1000);
         $batchDelay = NumberUtils::bound($input->getOption('batch-delay'), 100, 600000);
         $context = json_decode($input->getOption('context') ?: '{}', true);
-        $context['tenant_id'] = $input->getOption('tenant-id');
+        $context['tenant_id'] = (string)$input->getOption('tenant-id');
 
         $ncr = $this->getNcr();
         $i = 0;
