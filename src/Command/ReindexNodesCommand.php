@@ -5,6 +5,7 @@ namespace Gdbots\Bundle\NcrBundle\Command;
 
 use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\SchemaQName;
+use Gdbots\Schemas\Ncr\Mixin\Indexed\Indexed;
 use Gdbots\Schemas\Ncr\Mixin\Indexed\IndexedV1Mixin;
 use Gdbots\Schemas\Ncr\Mixin\Node\Node;
 use Gdbots\Schemas\Ncr\NodeRef;
@@ -127,6 +128,14 @@ EOF
             &$i,
             &$queue
         ) {
+            if (!$node instanceof Indexed) {
+                $io->note(sprintf(
+                    'IGNORING - Node [%s] does not have mixin [gdbots:ncr:mixin:indexed].',
+                    NodeRef::fromNode($node)
+                ));
+                return;
+            }
+
             ++$i;
             $output->writeln(
                 sprintf(
