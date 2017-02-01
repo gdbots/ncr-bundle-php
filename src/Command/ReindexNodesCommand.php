@@ -110,7 +110,7 @@ EOF
         $i = 0;
         $reindexed = 0;
         $queue = [];
-        $io->comment(sprintf('Processing batch %d for qname "%s".', $batch, $qname ?? 'ALL'));
+        //$io->comment(sprintf('Processing batch %d for qname "%s".', $batch, $qname ?? 'ALL'));
         $io->comment(sprintf('context: %s', json_encode($context)));
         $io->newLine();
 
@@ -141,22 +141,24 @@ EOF
             );
             $queue[] = $node->freeze();
 
-            if (0 === $i % $batchSize) {
-                $this->reindex($queue, $reindexed, $io, $context, $batch, $dryRun, $skipErrors);
+            if (count($queue) >= $batchSize) {
+                $nodes = $queue;
+                $queue = [];
+                $this->reindex($nodes, $reindexed, $io, $context, $batch, $dryRun, $skipErrors);
                 ++$batch;
 
                 if ($batchDelay > 0) {
-                    $io->newLine();
-                    $io->note(sprintf('Pausing for %d milliseconds.', $batchDelay));
+                    //$io->newLine();
+                    //$io->note(sprintf('Pausing for %d milliseconds.', $batchDelay));
                     usleep($batchDelay * 1000);
                 }
 
-                $io->comment(sprintf('Processing batch %d.', $batch));
-                $io->newLine();
+                //$io->comment(sprintf('Processing batch %d.', $batch));
+                //$io->newLine();
             }
         };
 
-        foreach ($this->getSchemasUsingMixin(IndexedV1Mixin::create(), $qname) as $schema) {
+        foreach ($this->getSchemasUsingMixin(IndexedV1Mixin::create(), (string)$qname ?: null) as $schema) {
             $ncr->pipeNodes($schema->getQName(), $receiver, $context);
         }
 
@@ -166,7 +168,7 @@ EOF
     }
 
     /**
-     * @param array        $queue
+     * @param array        $nodes
      * @param int          $reindexed
      * @param SymfonyStyle $io
      * @param array        $context
@@ -176,13 +178,13 @@ EOF
      *
      * @throws \Exception
      */
-    protected function reindex(array &$queue, int &$reindexed, SymfonyStyle $io, array $context, int $batch, bool $dryRun = false, bool $skipErrors = false): void
+    protected function reindex(array $nodes, int &$reindexed, SymfonyStyle $io, array $context, int $batch, bool $dryRun = false, bool $skipErrors = false): void
     {
         if ($dryRun) {
             $io->note(sprintf('DRY RUN - Would reindex node batch %d here.', $batch));
         } else {
             try {
-                $this->getNcrSearch()->indexNodes($queue, $context);
+                $this->getNcrSearch()->indexNodes($nodes, $context);
             } catch (\Exception $e) {
                 $io->error($e->getMessage());
                 $io->note(sprintf('Failed to index batch %d.', $batch));
@@ -194,7 +196,6 @@ EOF
             }
         }
 
-        $reindexed += count($queue);
-        $queue = [];
+        $reindexed += count($nodes);
     }
 }
