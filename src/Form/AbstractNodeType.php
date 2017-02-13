@@ -13,6 +13,7 @@ abstract class AbstractNodeType extends AbstractPbjType
     protected function getIgnoredFields(): array
     {
         return [
+            '_id',
             'created_at',
             'creator_ref',
             'updated_at',
@@ -26,6 +27,6 @@ abstract class AbstractNodeType extends AbstractPbjType
      */
     protected function getHiddenFields(): array
     {
-        return ['_id', 'status', 'etag'];
+        return ['status', 'etag'];
     }
 }
