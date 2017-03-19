@@ -23,7 +23,11 @@ class GdbotsNcrExtension extends Extension
 
         $config = $processor->processConfiguration($configuration, $config);
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader->load('ncr.xml');
+        $loader->load('ncr_cache.xml');
+        $loader->load('ncr_search.xml');
         $loader->load('services.xml');
+        $loader->load('twig.xml');
 
         // ncr
         $container->setParameter('gdbots_ncr.ncr.provider', $config['ncr']['provider']);

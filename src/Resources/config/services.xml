@@ -4,89 +4,16 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
   <services>
-    <service id="gdbots_ncr.twig.ncr_extension" class="Gdbots\Bundle\NcrBundle\Twig\NcrExtension" public="false">
-      <argument type="service" id="service_container"/>
-      <argument type="service" id="logger" on-invalid="ignore"/>
-      <tag name="monolog.logger" channel="ncr"/>
-      <tag name="twig.extension"/>
-    </service>
-
-    <!-- start: ncr cache -->
-    <service id="ncr_cache" class="Gdbots\Ncr\NcrCache">
-      <argument type="service" id="ncr_lazy_loader"/>
-      <argument>%gdbots_ncr.ncr_cache.max_items%</argument>
-    </service>
-
-    <service id="ncr_lazy_loader" class="Gdbots\Ncr\NcrLazyLoader">
-      <argument type="service" id="pbjx"/>
-      <argument type="service" id="logger" on-invalid="ignore"/>
-      <tag name="monolog.logger" channel="ncr"/>
-    </service>
-
-    <service id="gdbots_ncr.ncr_request_interceptor" class="Gdbots\Ncr\NcrRequestInterceptor">
-      <argument type="service" id="ncr_cache"/>
-      <tag name="pbjx.event_subscriber"/>
-    </service>
-    <!-- end: ncr cache -->
-
-
-    <!-- start: ncr -->
-    <service id="gdbots_ncr.ncr.memoizing" class="Gdbots\Ncr\Repository\MemoizingNcr" decorates="ncr" decoration-priority="-1000" public="false">
-      <argument type="service" id="gdbots_ncr.ncr.memoizing.inner"/>
-      <argument type="service" id="ncr_cache"/>
-      <argument>%gdbots_ncr.ncr.memoizing.read_through%</argument>
-    </service>
-
-    <service id="gdbots_ncr.ncr.psr6" class="%gdbots_ncr.ncr.psr6.class%" decorates="ncr" public="false">
-      <argument type="service" id="gdbots_ncr.ncr.psr6.inner"/>
-      <argument type="service" id="cache.app"/>
-      <argument>%gdbots_ncr.ncr.psr6.read_through%</argument>
-    </service>
-
-    <service id="gdbots_ncr.ncr.dynamodb" class="%gdbots_ncr.ncr.dynamodb.class%" public="false">
-      <argument type="service" id="aws.dynamodb" on-invalid="ignore"/>
-      <argument type="service" id="gdbots_ncr.ncr.dynamodb.table_manager"/>
-      <argument>%gdbots_ncr.ncr.dynamodb.config%</argument>
-      <argument type="service" id="logger" on-invalid="ignore"/>
-      <tag name="monolog.logger" channel="ncr"/>
-    </service>
-
-    <service id="gdbots_ncr.ncr.dynamodb.table_manager" class="%gdbots_ncr.ncr.dynamodb.table_manager.class%" public="false">
-      <argument>%gdbots_ncr.ncr.dynamodb.table_manager.table_name_prefix%</argument>
-      <argument>%gdbots_ncr.ncr.dynamodb.table_manager.node_tables%</argument>
-    </service>
-    <!-- end: ncr -->
-
-
-    <!-- start: ncr search -->
-    <service id="gdbots_ncr.ncr_search.elastica" class="%gdbots_ncr.ncr_search.elastica.class%" public="false">
-      <argument type="service" id="gdbots_ncr.ncr_search.elastica.client_manager"/>
-      <argument type="service" id="gdbots_ncr.ncr_search.elastica.index_manager"/>
-      <argument type="service" id="logger" on-invalid="ignore"/>
-      <argument>%gdbots_ncr.ncr_search.elastica.query_timeout%</argument>
-      <tag name="monolog.logger" channel="ncr_search"/>
-    </service>
-
-    <service id="gdbots_ncr.ncr_search.elastica.client_manager" class="Gdbots\Ncr\Search\Elastica\ClientManager" public="false">
-      <argument>%gdbots_ncr.ncr_search.elastica.clusters%</argument>
-      <argument type="service" id="logger" on-invalid="ignore"/>
-      <tag name="monolog.logger" channel="ncr_search"/>
-    </service>
-
-    <service id="gdbots_ncr.ncr_search.elastica.index_manager" class="%gdbots_ncr.ncr_search.elastica.index_manager.class%" public="false">
-      <argument>%gdbots_ncr.ncr_search.elastica.index_manager.index_prefix%</argument>
-      <argument>%gdbots_ncr.ncr_search.elastica.index_manager.indexes%</argument>
-      <argument>%gdbots_ncr.ncr_search.elastica.index_manager.types%</argument>
-    </service>
-    <!-- end: ncr search -->
-
-
-    <!-- start: binders -->
+    <!-- binders -->
     <service id="gdbots_ncr.node_command_binder" class="Gdbots\Ncr\Binder\NodeCommandBinder">
       <tag name="pbjx.event_subscriber"/>
     </service>
-    <!-- end: binders -->
 
+    <!-- request handlers -->
+    <service id="gdbots_ncr.get_node_batch_request_handler" class="Gdbots\Ncr\GetNodeBatchRequestHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
   </services>
 
 </container>
