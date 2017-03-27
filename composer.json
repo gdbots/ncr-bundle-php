@@ -5,15 +5,16 @@
   "type": "library",
   "license": "Apache-2.0",
   "require": {
-    "php": ">=7.0",
-    "gdbots/ncr": "dev-beta as 0.1.0",
-    "gdbots/pbjx": "dev-es as 1.0.0",
-    "gdbots/schemas": "dev-es as 1.0.0",
-    "symfony/symfony": "~3.1"
+    "php": ">=7.1",
+    "gdbots/ncr": "~0.1",
+    "gdbots/pbjx-bundle": "~0.1",
+    "symfony/symfony": "~3.2"
   },
   "require-dev": {
     "composer/composer": "1.0.*@dev",
-    "phpunit/phpunit": "~4.3"
+    "phpunit/phpunit": "~4.3",
+    "aws/aws-sdk-php": "~3.21",
+    "ruflin/elastica": "~3.2"
   },
   "autoload": {
     "psr-4": {
