@@ -5,7 +5,7 @@ ncr-bundle-php
 [![Code Climate](https://codeclimate.com/github/gdbots/ncr-bundle-php/badges/gpa.svg)](https://codeclimate.com/github/gdbots/ncr-bundle-php)
 [![Test Coverage](https://codeclimate.com/github/gdbots/ncr-bundle-php/badges/coverage.svg)](https://codeclimate.com/github/gdbots/ncr-bundle-php/coverage)
 
-Symfony3 bundle that integrates [gdbots/ncr](https://github.com/gdbots/ncr-php) library.
+Symfony bundle that integrates [gdbots/ncr](https://github.com/gdbots/ncr-php) library.
 
 
 # Configuration
@@ -125,6 +125,7 @@ services:
   # to optimize batch requests.
   acme_ncr.ncr_lazy_loading_handler:
     class: Acme\Ncr\NcrLazyLoadingHandler
+    public: true
     arguments: ['@ncr_lazy_loader']
     tags:
       - {name: pbjx.event_subscriber}
@@ -136,7 +137,7 @@ services:
 It is recommended to have data retrieval be the responsibility of Pbjx requests, however, that strategy doesn't work for all uses cases.  A `NcrAwareControllerTrait` is provided which gives you methods to fetch the key Ncr services from the Symfony container.
 
 
-# Symfony Form Types
+# Symfony Form Types (deprecated)
 We have found that many node operations have a common requirement to hide/ignore certain fields that are generally only populated by the server.  Extend the `Gdbots\Bundle\NcrBundle\Form\AbstractNodeType` for your `Node` types.
 
 
@@ -160,12 +161,13 @@ Here is the creator:
 This library provides the basics for creating and extracting data from the Ncr services. Run the Symfony console and look for __ncr__ commands.
 
 ```txt
- ncr:create-search-storage           Creates the NcrSearch storage.
- ncr:create-storage                  Creates the Ncr storage.
- ncr:describe-search-storage         Describes the NcrSearch storage.
- ncr:describe-storage                Describes the Ncr storage.
- ncr:export-nodes                    Pipes nodes from the Ncr to STDOUT.
- ncr:reindex-nodes                   Pipes nodes from the Ncr and reindexes them.
+ncr:create-search-storage           Creates the NcrSearch storage.
+ncr:create-storage                  Creates the Ncr storage.
+ncr:describe-search-storage         Describes the NcrSearch storage.
+ncr:describe-storage                Describes the Ncr storage.
+ncr:export-nodes                    Pipes nodes from the Ncr to STDOUT.
+ncr:get-node                        Fetches a single node by its NodeRef and writes to STDOUT.
+ncr:reindex-nodes                   Pipes nodes from the Ncr and reindexes them.
 ```
 
 Review the `--help` on the ncr commands for more details.

@@ -1,20 +1,18 @@
 {
   "name": "gdbots/ncr-bundle",
   "homepage": "https://github.com/gdbots/ncr-bundle-php",
-  "description": "Symfony3 bundle that integrates gdbots/ncr library.",
+  "description": "Symfony bundle that integrates gdbots/ncr library.",
   "type": "library",
   "license": "Apache-2.0",
   "require": {
     "php": ">=7.1",
-    "gdbots/ncr": "~0.1",
-    "gdbots/pbjx-bundle": "~0.1",
-    "symfony/symfony": "~3.2"
+    "gdbots/ncr": "^0.1.2",
+    "gdbots/pbjx-bundle": "^0.1.2"
   },
   "require-dev": {
-    "composer/composer": "1.0.*@dev",
-    "phpunit/phpunit": "~4.3",
-    "aws/aws-sdk-php": "~3.21",
-    "ruflin/elastica": "~3.2"
+    "phpunit/phpunit": "^6.4",
+    "aws/aws-sdk-php-symfony": "^1.0",
+    "ruflin/elastica": "^5.3"
   },
   "autoload": {
     "psr-4": {
@@ -24,6 +22,14 @@
   "autoload-dev": {
     "psr-4": {
       "Gdbots\\Tests\\Bundle\\NcrBundle\\": "tests"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "0.1.x-dev"
     }
   }
 }

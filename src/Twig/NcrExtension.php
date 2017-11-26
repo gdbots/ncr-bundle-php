@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Twig;
 
@@ -11,12 +11,11 @@ use Gdbots\Schemas\Ncr\Mixin\Node\Node;
 use Gdbots\Schemas\Ncr\NodeRef;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 final class NcrExtension extends \Twig_Extension
 {
-    /** @var ContainerInterface */
-    private $container;
+    /** @var NcrCache */
+    private $ncrCache;
 
     /** @var LoggerInterface */
     private $logger;
@@ -25,14 +24,15 @@ final class NcrExtension extends \Twig_Extension
     private $debug = false;
 
     /**
-     * @param ContainerInterface $container
-     * @param LoggerInterface    $logger
+     * @param NcrCache        $ncrCache
+     * @param LoggerInterface $logger
+     * @param bool            $debug
      */
-    public function __construct(ContainerInterface $container, ?LoggerInterface $logger = null)
+    public function __construct(NcrCache $ncrCache, ?LoggerInterface $logger = null, bool $debug = false)
     {
-        $this->container = $container;
+        $this->ncrCache = $ncrCache;
         $this->logger = $logger ?: new NullLogger();
-        $this->debug = $container->getParameter('kernel.debug');
+        $this->debug = $debug;
     }
 
     /**
@@ -78,10 +78,10 @@ final class NcrExtension extends \Twig_Extension
 
         try {
             if (!$nodeRef instanceof NodeRef) {
-                $nodeRef = NodeRef::fromString((string) $nodeRef);
+                $nodeRef = NodeRef::fromString((string)$nodeRef);
             }
 
-            return $this->getNcrCache()->getNode($nodeRef);
+            return $this->ncrCache->getNode($nodeRef);
         } catch (NodeNotFound $e) {
             return null;
         } catch (\Exception $e) {
@@ -94,18 +94,10 @@ final class NcrExtension extends \Twig_Extension
                     '%s::Unable to process twig "ncr_get_node" function for [{node_ref}].',
                     ClassUtils::getShortName($e)
                 ),
-                ['exception' => $e, 'node_ref' => (string) $nodeRef]
+                ['exception' => $e, 'node_ref' => (string)$nodeRef]
             );
         }
 
         return null;
-    }
-
-    /**
-     * @return NcrCache
-     */
-    private function getNcrCache(): NcrCache
-    {
-        return $this->container->get('ncr_cache');
     }
 }

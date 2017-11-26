@@ -5,12 +5,12 @@
 
   <services>
     <!-- binders -->
-    <service id="gdbots_ncr.node_command_binder" class="Gdbots\Ncr\Binder\NodeCommandBinder">
+    <service id="gdbots_ncr.node_command_binder" class="Gdbots\Ncr\Binder\NodeCommandBinder" public="true">
       <tag name="pbjx.event_subscriber"/>
     </service>
 
     <!-- request handlers -->
-    <service id="gdbots_ncr.get_node_batch_request_handler" class="Gdbots\Ncr\GetNodeBatchRequestHandler">
+    <service id="gdbots_ncr.get_node_batch_request_handler" class="Gdbots\Ncr\GetNodeBatchRequestHandler" public="true">
       <argument type="service" id="ncr"/>
       <tag name="pbjx.handler"/>
     </service>
