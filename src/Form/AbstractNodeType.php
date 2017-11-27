@@ -1,10 +1,13 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Form;
 
 use Gdbots\Bundle\PbjxBundle\Form\AbstractPbjType;
 
+/**
+ * @deprecated All form functionality moving to front end (react/angular/etc.)
+ */
 abstract class AbstractNodeType extends AbstractPbjType
 {
     /**

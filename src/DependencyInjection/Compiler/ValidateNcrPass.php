@@ -1,10 +1,10 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\DependencyInjection\Compiler;
 
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Checks the container to ensure that the NCR has the provider defined and that it's valid.
@@ -67,7 +67,7 @@ class ValidateNcrPass implements CompilerPassInterface
             throw new \LogicException(
                 'The service "gdbots_ncr.ncr.dynamodb" has a dependency on a non-existent ' .
                 'service "aws.dynamodb". This expects the DynamoDb Client that comes from ' .
-                'composer package "aws/aws-sdk-php-symfony": "~1.0".'
+                'composer package "aws/aws-sdk-php-symfony": "^1.0".'
             );
         }
     }

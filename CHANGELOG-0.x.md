@@ -2,5 +2,10 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.1.1
+* Add support for Symfony 4.
+* Add `ncr:get-node` symfony console command.
+
+
 ## v0.1.0
 * Initial version.
