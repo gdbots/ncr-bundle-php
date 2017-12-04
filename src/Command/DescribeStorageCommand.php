@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
+use Gdbots\Ncr\Ncr;
 use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -13,7 +14,16 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class DescribeStorageCommand extends ContainerAwareCommand
 {
-    use NcrAwareCommandTrait;
+    use NcrCommandTrait;
+
+    /**
+     * @param Ncr $ncr
+     */
+    public function __construct(Ncr $ncr)
+    {
+        parent::__construct(null);
+        $this->ncr = $ncr;
+    }
 
     /**
      * {@inheritdoc}
@@ -56,7 +66,7 @@ EOF
      *
      * @return null
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -65,18 +75,17 @@ EOF
 
         $io = new SymfonyStyle($input, $output);
         $io->title('Ncr Storage Describer');
-        $ncr = $this->getNcr();
 
         foreach ($this->getSchemasUsingMixin(NodeV1Mixin::create(), $input->getArgument('qname')) as $schema) {
             $qname = $schema->getQName();
 
             try {
-                $details = $ncr->describeStorage($qname, $context);
+                $details = $this->ncr->describeStorage($qname, $context);
                 $io->success(sprintf('Describing Ncr storage for "%s".', $qname));
                 $io->comment(sprintf('context: %s', json_encode($context)));
                 $io->text($details);
                 $io->newLine();
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $io->error(sprintf('Failed to describe Ncr storage for "%s".', $qname));
                 $io->text($e->getMessage());
                 if ($e->getPrevious()) {

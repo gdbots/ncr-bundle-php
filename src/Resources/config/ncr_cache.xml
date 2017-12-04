@@ -4,18 +4,18 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
   <services>
-    <service id="ncr_cache" class="Gdbots\Ncr\NcrCache" public="true">
+    <service id="ncr_cache" class="Gdbots\Ncr\NcrCache" public="false">
       <argument type="service" id="ncr_lazy_loader"/>
       <argument>%gdbots_ncr.ncr_cache.max_items%</argument>
     </service>
 
-    <service id="ncr_lazy_loader" class="Gdbots\Ncr\NcrLazyLoader" public="true">
+    <service id="ncr_lazy_loader" class="Gdbots\Ncr\NcrLazyLoader" public="false">
       <argument type="service" id="pbjx"/>
       <argument type="service" id="logger" on-invalid="ignore"/>
       <tag name="monolog.logger" channel="ncr"/>
     </service>
 
-    <service id="gdbots_ncr.ncr_request_interceptor" class="Gdbots\Ncr\NcrRequestInterceptor" public="true">
+    <service id="gdbots_ncr.ncr_request_interceptor" class="Gdbots\Ncr\NcrRequestInterceptor" public="false">
       <argument type="service" id="ncr_cache"/>
       <tag name="pbjx.event_subscriber"/>
     </service>

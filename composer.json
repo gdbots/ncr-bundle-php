@@ -6,8 +6,8 @@
   "license": "Apache-2.0",
   "require": {
     "php": ">=7.1",
-    "gdbots/ncr": "^0.1.2",
-    "gdbots/pbjx-bundle": "^0.1.2"
+    "gdbots/ncr": "~0.1",
+    "gdbots/pbjx-bundle": "~0.2"
   },
   "require-dev": {
     "phpunit/phpunit": "^6.4",
@@ -29,7 +29,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "0.1.x-dev"
+      "dev-master": "0.2.x-dev"
     }
   }
 }

@@ -62,7 +62,7 @@ final class NcrExtension extends \Twig_Extension
      *
      * @return Node|null
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function getNode($ref): ?Node
     {
@@ -84,7 +84,7 @@ final class NcrExtension extends \Twig_Extension
             return $this->ncrCache->getNode($nodeRef);
         } catch (NodeNotFound $e) {
             return null;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             if ($this->debug) {
                 throw $e;
             }

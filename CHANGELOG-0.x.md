@@ -2,9 +2,23 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.2.0
+__BREAKING CHANGES__
+
+* Register all commands in `Command` namespace using new Symfony 4 convention.
+* Require `"gdbots/pbjx-bundle": "~0.2"` which requires `"symfony/framework-bundle": "^4.0"`.
+* Remove `Gdbots\Bundle\NcrBundle\Form` as symfony forms is no longer apart of `gdbots/pbjx-bundle`.
+* Register interfaces and classes for autowiring:
+  * `Gdbots\Ncr\Ncr`
+  * `Gdbots\Ncr\NcrCache`
+  * `Gdbots\Ncr\NcrLazyLoader`
+  * `Gdbots\Ncr\NcrSearch`
+
+
 ## v0.1.1
 * Add support for Symfony 4.
 * Add `ncr:get-node` symfony console command.
+
 
 
 ## v0.1.0

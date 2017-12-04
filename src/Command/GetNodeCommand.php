@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
+use Gdbots\Ncr\Ncr;
 use Gdbots\Schemas\Ncr\NodeRef;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -13,7 +14,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class GetNodeCommand extends ContainerAwareCommand
 {
-    use NcrAwareCommandTrait;
+    use NcrCommandTrait;
+
+    /**
+     * @param Ncr $ncr
+     */
+    public function __construct(Ncr $ncr)
+    {
+        parent::__construct(null);
+        $this->ncr = $ncr;
+    }
 
     /**
      * {@inheritdoc}
@@ -71,13 +81,12 @@ EOF
         $context = json_decode($input->getOption('context') ?: '{}', true);
         $context['tenant_id'] = (string)$input->getOption('tenant-id');
 
-        $ncr = $this->getNcr();
         $nodeRef = NodeRef::fromString($input->getArgument('node-ref'));
 
         try {
-            $node = $ncr->getNode($nodeRef, true, $context);
+            $node = $this->ncr->getNode($nodeRef, true, $context);
             echo json_encode($node, $input->getOption('pretty') ? JSON_PRETTY_PRINT : 0) . PHP_EOL;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $errOutput->writeln($e->getMessage());
         }
     }
