@@ -82,6 +82,8 @@ EOF
      * @param OutputInterface $output
      *
      * @return null
+     *
+     * @throws \Throwable
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {

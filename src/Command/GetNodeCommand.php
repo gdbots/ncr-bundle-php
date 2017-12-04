@@ -86,7 +86,7 @@ EOF
         try {
             $node = $this->ncr->getNode($nodeRef, true, $context);
             echo json_encode($node, $input->getOption('pretty') ? JSON_PRETTY_PRINT : 0) . PHP_EOL;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $errOutput->writeln($e->getMessage());
         }
     }

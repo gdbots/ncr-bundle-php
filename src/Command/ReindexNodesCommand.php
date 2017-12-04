@@ -100,6 +100,8 @@ EOF
      * @param OutputInterface $output
      *
      * @return null
+     *
+     * @throws \Throwable
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -197,7 +199,7 @@ EOF
      * @param bool         $dryRun
      * @param bool         $skipErrors
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
     protected function reindex(array $nodes, int &$reindexed, SymfonyStyle $io, array $context, int $batch, bool $dryRun = false, bool $skipErrors = false): void
     {
@@ -206,7 +208,7 @@ EOF
         } else {
             try {
                 $this->ncrSearch->indexNodes($nodes, $context);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $io->error($e->getMessage());
                 $io->note(sprintf('Failed to index batch %d.', $batch));
                 $io->newLine(2);

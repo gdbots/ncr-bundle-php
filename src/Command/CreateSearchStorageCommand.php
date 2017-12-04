@@ -72,7 +72,7 @@ EOF
      *
      * @return null
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -89,7 +89,7 @@ EOF
             try {
                 $this->ncrSearch->createStorage($qname, $context);
                 $io->success(sprintf('Created NcrSearch storage for "%s".', $qname));
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 if (!$skipErrors) {
                     throw $e;
                 }

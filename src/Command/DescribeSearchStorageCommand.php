@@ -66,7 +66,7 @@ EOF
      *
      * @return null
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -85,7 +85,7 @@ EOF
                 $io->comment(sprintf('context: %s', json_encode($context)));
                 $io->text($details);
                 $io->newLine();
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $io->error(sprintf('Failed to describe NcrSearch storage for "%s".', $qname));
                 $io->text($e->getMessage());
                 if ($e->getPrevious()) {

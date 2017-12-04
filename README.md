@@ -135,11 +135,15 @@ services:
 
 # Controllers
 It is recommended to have data retrieval be the responsibility of Pbjx requests, however, 
-that strategy doesn't work for all uses cases.  A `NcrAwareControllerTrait` is provided 
-which gives you methods to fetch the key Ncr services from the Symfony container.
+that strategy doesn't work for all uses cases.  Use Symfony autowiring and typehint the 
+interface in your constructor or setter methods to get key Ncr services.
 
-> New Symfony autowiring also works for the same services provided by the trait.
-> Use the interface as the typehint in your constructor.
+Autowiring supported for these interfaces:
+
+* `Gdbots\Ncr\Ncr`
+* `Gdbots\Ncr\NcrCache`
+* `Gdbots\Ncr\NcrLazyLoader`
+* `Gdbots\Ncr\NcrSearch`
 
 
 # Twig Extension
