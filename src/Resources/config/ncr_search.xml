@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
   <services>
-    <service id="gdbots_ncr.ncr_search.elastica" class="%gdbots_ncr.ncr_search.elastica.class%" public="false">
+    <service id="gdbots_ncr.ncr_search.elastica" class="%gdbots_ncr.ncr_search.elastica.class%" public="true">
       <argument type="service" id="gdbots_ncr.ncr_search.elastica.client_manager"/>
       <argument type="service" id="gdbots_ncr.ncr_search.elastica.index_manager"/>
       <argument type="service" id="logger" on-invalid="ignore"/>
@@ -12,13 +12,13 @@
       <tag name="monolog.logger" channel="ncr_search"/>
     </service>
 
-    <service id="gdbots_ncr.ncr_search.elastica.client_manager" class="Gdbots\Ncr\Search\Elastica\ClientManager" public="false">
+    <service id="gdbots_ncr.ncr_search.elastica.client_manager" class="Gdbots\Ncr\Search\Elastica\ClientManager" public="true">
       <argument>%gdbots_ncr.ncr_search.elastica.clusters%</argument>
       <argument type="service" id="logger" on-invalid="ignore"/>
       <tag name="monolog.logger" channel="ncr_search"/>
     </service>
 
-    <service id="gdbots_ncr.ncr_search.elastica.index_manager" class="%gdbots_ncr.ncr_search.elastica.index_manager.class%" public="false">
+    <service id="gdbots_ncr.ncr_search.elastica.index_manager" class="%gdbots_ncr.ncr_search.elastica.index_manager.class%" public="true">
       <argument>%gdbots_ncr.ncr_search.elastica.index_manager.index_prefix%</argument>
       <argument>%gdbots_ncr.ncr_search.elastica.index_manager.indexes%</argument>
       <argument>%gdbots_ncr.ncr_search.elastica.index_manager.types%</argument>

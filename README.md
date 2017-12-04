@@ -9,17 +9,17 @@ Symfony bundle that integrates [gdbots/ncr](https://github.com/gdbots/ncr-php) l
 
 
 # Configuration
-Follow the standard [bundle install](http://symfony.com/doc/current/bundles/installation.html) using __gdbots/ncr-bundle__ as the composer package name.
+Follow the standard [bundle install](http://symfony.com/doc/current/bundles/installation.html)
+using __gdbots/ncr-bundle__ as the composer package name.
 
 > The examples below assume you're running the DynamoDb Ncr and Elastica NcrSearch.
 
-__config.yml:__
+__config/packages/ncr.yml:__
 
 ```yaml
 # many of the configurations below are defaults so you can remove them
 # from your configuration, added here for reference
 
-# these parameters would likely be in your parameters.yml file, not here
 parameters:
   cloud_region: 'us-west-2'
   es_clusters:
@@ -35,7 +35,7 @@ gdbots_ncr:
   ncr:
     provider: dynamodb
     memoizing:
-      enable: true # default
+      enabled: true # default
       #
       # IMPORTANT read_through notes for the memoizer
       #
@@ -125,7 +125,7 @@ services:
   # to optimize batch requests.
   acme_ncr.ncr_lazy_loading_handler:
     class: Acme\Ncr\NcrLazyLoadingHandler
-    public: true
+    public: false
     arguments: ['@ncr_lazy_loader']
     tags:
       - {name: pbjx.event_subscriber}
@@ -134,17 +134,20 @@ services:
 
 
 # Controllers
-It is recommended to have data retrieval be the responsibility of Pbjx requests, however, that strategy doesn't work for all uses cases.  A `NcrAwareControllerTrait` is provided which gives you methods to fetch the key Ncr services from the Symfony container.
+It is recommended to have data retrieval be the responsibility of Pbjx requests, however, 
+that strategy doesn't work for all uses cases.  A `NcrAwareControllerTrait` is provided 
+which gives you methods to fetch the key Ncr services from the Symfony container.
 
-
-# Symfony Form Types (deprecated)
-We have found that many node operations have a common requirement to hide/ignore certain fields that are generally only populated by the server.  Extend the `Gdbots\Bundle\NcrBundle\Form\AbstractNodeType` for your `Node` types.
+> New Symfony autowiring also works for the same services provided by the trait.
+> Use the interface as the typehint in your constructor.
 
 
 # Twig Extension
-The `NcrExtension` provides one function called `ncr_get_node`.  It is important to note that this does __NOT__ make a query to get a node, instead it pulls from `NcrCache`.
+The `NcrExtension` provides one function called `ncr_get_node`.  It is important to note 
+that this does __NOT__ make a query to get a node, instead it pulls from `NcrCache`.
 
-> This might change in the future, but this strategy eliminates horribly performing twig templates that make Ncr queries.
+> This might change in the future, but this strategy eliminates horribly performing
+> twig templates that make Ncr queries.
 
 The function will accept a `MessageRef`, `NodeRef` or a string version of a NodeRef.
 
@@ -158,7 +161,8 @@ Here is the creator:
 
 
 # Console Commands
-This library provides the basics for creating and extracting data from the Ncr services. Run the Symfony console and look for __ncr__ commands.
+This library provides the basics for creating and extracting data from the Ncr services.
+Run the Symfony console and look for __ncr__ commands.
 
 ```txt
 ncr:create-search-storage           Creates the NcrSearch storage.

@@ -15,7 +15,7 @@
       <tag name="monolog.logger" channel="ncr"/>
     </service>
 
-    <service id="gdbots_ncr.ncr_request_interceptor" class="Gdbots\Ncr\NcrRequestInterceptor" public="true">
+    <service id="gdbots_ncr.ncr_request_interceptor" class="Gdbots\Ncr\NcrRequestInterceptor" public="false">
       <argument type="service" id="ncr_cache"/>
       <tag name="pbjx.event_subscriber"/>
     </service>

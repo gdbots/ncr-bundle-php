@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\DependencyInjection;
 
+use Gdbots\Ncr\Ncr;
+use Gdbots\Ncr\NcrCache;
+use Gdbots\Ncr\NcrLazyLoader;
+use Gdbots\Ncr\NcrSearch;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -41,6 +45,8 @@ class GdbotsNcrExtension extends Extension
 
         // ncr_cache
         $container->setParameter('gdbots_ncr.ncr_cache.max_items', $config['ncr_cache']['max_items']);
+        $container->setAlias(NcrCache::class, 'ncr_cache');
+        $container->setAlias(NcrLazyLoader::class, 'ncr_lazy_loader');
 
         // ncr_search
         $container->setParameter('gdbots_ncr.ncr_search.provider', $config['ncr_search']['provider']);
@@ -95,6 +101,7 @@ class GdbotsNcrExtension extends Extension
         ]);
 
         $container->setAlias('ncr', $service);
+        $container->setAlias(Ncr::class, 'ncr');
     }
 
     /**
@@ -123,5 +130,6 @@ class GdbotsNcrExtension extends Extension
         $container->setParameter("{$service}.clusters", $elastica['clusters']);
 
         $container->setAlias('ncr_search', $service);
+        $container->setAlias(NcrSearch::class, 'ncr_search');
     }
 }
