@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
+use Gdbots\Ncr\NcrSearch;
 use Gdbots\Schemas\Ncr\Mixin\Indexed\IndexedV1Mixin;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -13,7 +14,16 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class CreateSearchStorageCommand extends ContainerAwareCommand
 {
-    use NcrAwareCommandTrait;
+    use NcrCommandTrait;
+
+    /**
+     * @param NcrSearch $ncrSearch
+     */
+    public function __construct(NcrSearch $ncrSearch)
+    {
+        parent::__construct(null);
+        $this->ncrSearch = $ncrSearch;
+    }
 
     /**
      * {@inheritdoc}
@@ -72,13 +82,12 @@ EOF
 
         $io = new SymfonyStyle($input, $output);
         $io->title('NcrSearch Storage Creator');
-        $ncrSearch = $this->getNcrSearch();
 
         foreach ($this->getSchemasUsingMixin(IndexedV1Mixin::create(), $input->getArgument('qname')) as $schema) {
             $qname = $schema->getQName();
 
             try {
-                $ncrSearch->createStorage($qname, $context);
+                $this->ncrSearch->createStorage($qname, $context);
                 $io->success(sprintf('Created NcrSearch storage for "%s".', $qname));
             } catch (\Exception $e) {
                 if (!$skipErrors) {

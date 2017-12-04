@@ -14,9 +14,21 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * @method ContainerInterface getContainer()
  */
-trait NcrAwareCommandTrait
+trait NcrCommandTrait
 {
     use PbjxAwareCommandTrait;
+
+    /** @var Ncr */
+    protected $ncr;
+
+    /** @var NcrCache */
+    protected $ncrCache;
+
+    /** @var NcrLazyLoader */
+    protected $ncrLazyLoader;
+
+    /** @var NcrSearch */
+    protected $ncrSearch;
 
     /**
      * @param SymfonyStyle $io
@@ -26,10 +38,9 @@ trait NcrAwareCommandTrait
      */
     protected function readyForNcrTraffic(SymfonyStyle $io, string $message = 'Aborting read of nodes.'): bool
     {
-        $container = $this->getContainer();
         $question = sprintf(
             'Have you prepared your Ncr [%s] and your devops team for the added traffic? ',
-            $container->getParameter('gdbots_ncr.ncr.provider')
+            $this->getContainer()->getParameter('gdbots_ncr.ncr.provider')
         );
 
         if (!$io->confirm($question)) {
@@ -38,37 +49,5 @@ trait NcrAwareCommandTrait
         }
 
         return true;
-    }
-
-    /**
-     * @return Ncr
-     */
-    protected function getNcr(): Ncr
-    {
-        return $this->getContainer()->get('ncr');
-    }
-
-    /**
-     * @return NcrCache
-     */
-    protected function getNcrCache(): NcrCache
-    {
-        return $this->getContainer()->get('ncr_cache');
-    }
-
-    /**
-     * @return NcrLazyLoader
-     */
-    protected function getNcrLazyLoader(): NcrLazyLoader
-    {
-        return $this->getContainer()->get('ncr_lazy_loader');
-    }
-
-    /**
-     * @return NcrSearch
-     */
-    protected function getNcrSearch(): NcrSearch
-    {
-        return $this->getContainer()->get('ncr_search');
     }
 }

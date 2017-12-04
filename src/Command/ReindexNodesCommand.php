@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Gdbots\Bundle\NcrBundle\Command;
 
 use Gdbots\Common\Util\NumberUtils;
+use Gdbots\Ncr\Ncr;
+use Gdbots\Ncr\NcrSearch;
 use Gdbots\Pbj\SchemaQName;
 use Gdbots\Schemas\Ncr\Mixin\Indexed\Indexed;
 use Gdbots\Schemas\Ncr\Mixin\Indexed\IndexedV1Mixin;
@@ -18,7 +20,18 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class ReindexNodesCommand extends ContainerAwareCommand
 {
-    use NcrAwareCommandTrait;
+    use NcrCommandTrait;
+
+    /**
+     * @param Ncr       $ncr
+     * @param NcrSearch $ncrSearch
+     */
+    public function __construct(Ncr $ncr, NcrSearch $ncrSearch)
+    {
+        parent::__construct(null);
+        $this->ncr = $ncr;
+        $this->ncrSearch = $ncrSearch;
+    }
 
     /**
      * {@inheritdoc}
@@ -106,7 +119,6 @@ EOF
             return;
         }
 
-        $ncr = $this->getNcr();
         $batch = 1;
         $i = 0;
         $reindexed = 0;
@@ -168,7 +180,7 @@ EOF
         };
 
         foreach ($this->getSchemasUsingMixin(IndexedV1Mixin::create(), (string)$qname ?: null) as $schema) {
-            $ncr->pipeNodes($schema->getQName(), $receiver, $context);
+            $this->ncr->pipeNodes($schema->getQName(), $receiver, $context);
         }
 
         $this->reindex($queue, $reindexed, $io, $context, $batch, $dryRun, $skipErrors);
@@ -193,7 +205,7 @@ EOF
             $io->note(sprintf('DRY RUN - Would reindex node batch %d here.', $batch));
         } else {
             try {
-                $this->getNcrSearch()->indexNodes($nodes, $context);
+                $this->ncrSearch->indexNodes($nodes, $context);
             } catch (\Exception $e) {
                 $io->error($e->getMessage());
                 $io->note(sprintf('Failed to index batch %d.', $batch));

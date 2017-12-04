@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Gdbots\Bundle\NcrBundle\Command;
 
 use Gdbots\Common\Util\NumberUtils;
+use Gdbots\Ncr\Ncr;
 use Gdbots\Schemas\Ncr\Mixin\Node\Node;
 use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -15,7 +16,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportNodesCommand extends ContainerAwareCommand
 {
-    use NcrAwareCommandTrait;
+    use NcrCommandTrait;
+
+    /**
+     * @param Ncr $ncr
+     */
+    public function __construct(Ncr $ncr)
+    {
+        parent::__construct(null);
+        $this->ncr = $ncr;
+    }
 
     /**
      * {@inheritdoc}
@@ -84,7 +94,6 @@ EOF
         $context = json_decode($input->getOption('context') ?: '{}', true);
         $context['tenant_id'] = (string)$input->getOption('tenant-id');
 
-        $ncr = $this->getNcr();
         $i = 0;
 
         $receiver = function (Node $node) use ($errOutput, $batchSize, $batchDelay, &$i) {
@@ -104,7 +113,7 @@ EOF
         };
 
         foreach ($this->getSchemasUsingMixin(NodeV1Mixin::create(), $input->getArgument('qname')) as $schema) {
-            $ncr->pipeNodes($schema->getQName(), $receiver, $context);
+            $this->ncr->pipeNodes($schema->getQName(), $receiver, $context);
         }
     }
 }
