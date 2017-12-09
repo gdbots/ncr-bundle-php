@@ -18,7 +18,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class ReindexNodesCommand extends ContainerAwareCommand
+final class ReindexNodesCommand extends ContainerAwareCommand
 {
     use NcrCommandTrait;
 
@@ -28,7 +28,7 @@ class ReindexNodesCommand extends ContainerAwareCommand
      */
     public function __construct(Ncr $ncr, NcrSearch $ncrSearch)
     {
-        parent::__construct(null);
+        parent::__construct();
         $this->ncr = $ncr;
         $this->ncrSearch = $ncrSearch;
     }

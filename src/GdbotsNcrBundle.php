@@ -9,7 +9,7 @@ use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class GdbotsNcrBundle extends Bundle
+final class GdbotsNcrBundle extends Bundle
 {
     /**
      * @param ContainerBuilder $container

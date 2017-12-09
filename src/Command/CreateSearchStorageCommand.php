@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class CreateSearchStorageCommand extends ContainerAwareCommand
+final class CreateSearchStorageCommand extends ContainerAwareCommand
 {
     use NcrCommandTrait;
 
@@ -21,7 +21,7 @@ class CreateSearchStorageCommand extends ContainerAwareCommand
      */
     public function __construct(NcrSearch $ncrSearch)
     {
-        parent::__construct(null);
+        parent::__construct();
         $this->ncrSearch = $ncrSearch;
     }
 

@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class CreateStorageCommand extends ContainerAwareCommand
+final class CreateStorageCommand extends ContainerAwareCommand
 {
     use NcrCommandTrait;
 
@@ -21,7 +21,7 @@ class CreateStorageCommand extends ContainerAwareCommand
      */
     public function __construct(Ncr $ncr)
     {
-        parent::__construct(null);
+        parent::__construct();
         $this->ncr = $ncr;
     }
 

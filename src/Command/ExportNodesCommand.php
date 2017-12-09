@@ -14,7 +14,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ExportNodesCommand extends ContainerAwareCommand
+final class ExportNodesCommand extends ContainerAwareCommand
 {
     use NcrCommandTrait;
 
@@ -23,7 +23,7 @@ class ExportNodesCommand extends ContainerAwareCommand
      */
     public function __construct(Ncr $ncr)
     {
-        parent::__construct(null);
+        parent::__construct();
         $this->ncr = $ncr;
     }
 

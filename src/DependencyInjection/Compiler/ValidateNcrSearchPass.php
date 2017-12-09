@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * Checks the container to ensure that the NCR search has the provider defined
  * and that it's valid.
  */
-class ValidateNcrSearchPass implements CompilerPassInterface
+final class ValidateNcrSearchPass implements CompilerPassInterface
 {
     /**
      * @param ContainerBuilder $container

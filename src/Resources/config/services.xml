@@ -4,19 +4,23 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
   <services>
-    <prototype namespace="Gdbots\Bundle\NcrBundle\Command\" resource="../../Command/*" autowire="true" public="false">
-      <tag name="console.command"/>
-    </prototype>
+    <defaults public="false"/>
+
+    <prototype namespace="Gdbots\Bundle\NcrBundle\Command\"
+        resource="../../Command/*"
+        autoconfigure="true"
+        autowire="true"/>
 
     <!-- binders -->
-    <service id="gdbots_ncr.node_command_binder" class="Gdbots\Ncr\Binder\NodeCommandBinder" public="false">
+    <service id="gdbots_ncr.node_command_binder" class="Gdbots\Ncr\Binder\NodeCommandBinder">
       <tag name="pbjx.event_subscriber"/>
+      <tag name="pbjx.binder"/>
     </service>
 
     <!-- request handlers -->
-    <service id="gdbots_ncr.get_node_batch_request_handler" class="Gdbots\Ncr\GetNodeBatchRequestHandler" public="false">
+    <service id="gdbots_ncr.get_node_batch_request_handler" class="Gdbots\Ncr\GetNodeBatchRequestHandler">
       <argument type="service" id="ncr"/>
-      <tag name="pbjx.handler" curie="gdbots:ncr:request:get-node-batch-request"/>
+      <tag name="pbjx.handler"/>
     </service>
   </services>
 

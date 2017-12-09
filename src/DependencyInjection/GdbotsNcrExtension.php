@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
-class GdbotsNcrExtension extends Extension
+final class GdbotsNcrExtension extends Extension
 {
     /**
      * @param array            $config

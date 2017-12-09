@@ -1,13 +1,19 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\DependencyInjection;
 
+use Gdbots\Ncr\Repository\DynamoDb\DynamoDbNcr;
+use Gdbots\Ncr\Repository\DynamoDb\TableManager;
+use Gdbots\Ncr\Repository\Psr6Ncr;
+use Gdbots\Ncr\Search\Elastica\ElasticaNcrSearch;
+use Gdbots\Ncr\Search\Elastica\IndexManager;
+use Gdbots\Ncr\Search\Elastica\NodeMapper;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-class Configuration implements ConfigurationInterface
+final class Configuration implements ConfigurationInterface
 {
     private $env;
 
@@ -63,7 +69,7 @@ class Configuration implements ConfigurationInterface
                                     ->treatNullLike(true)
                                 ->end()
                                 ->scalarNode('class')
-                                    ->defaultValue('Gdbots\Ncr\Repository\Psr6Ncr')
+                                    ->defaultValue(Psr6Ncr::class)
                                 ->end()
                             ->end()
                         ->end()
@@ -105,13 +111,13 @@ class Configuration implements ConfigurationInterface
             ->addDefaultsIfNotSet()
             ->children()
                 ->scalarNode('class')
-                    ->defaultValue('Gdbots\Ncr\Repository\DynamoDb\DynamoDbNcr')
+                    ->defaultValue(DynamoDbNcr::class)
                 ->end()
                 ->arrayNode('table_manager')
                     ->addDefaultsIfNotSet()
                     ->children()
                         ->scalarNode('class')
-                            ->defaultValue('Gdbots\Ncr\Repository\DynamoDb\TableManager')
+                            ->defaultValue(TableManager::class)
                         ->end()
                         ->scalarNode('table_name_prefix')
                             ->defaultValue("{$this->env}-ncr")
@@ -172,13 +178,13 @@ class Configuration implements ConfigurationInterface
             ->fixXmlConfig('cluster')
             ->children()
                 ->scalarNode('class')
-                    ->defaultValue('Gdbots\Ncr\Search\Elastica\ElasticaNcrSearch')
+                    ->defaultValue(ElasticaNcrSearch::class)
                 ->end()
                 ->arrayNode('index_manager')
                     ->addDefaultsIfNotSet()
                     ->children()
                         ->scalarNode('class')
-                            ->defaultValue('Gdbots\Ncr\Search\Elastica\IndexManager')
+                            ->defaultValue(IndexManager::class)
                         ->end()
                         ->scalarNode('index_prefix')
                             ->defaultValue("{$this->env}-ncr")
@@ -209,7 +215,7 @@ class Configuration implements ConfigurationInterface
                                 ->performNoDeepMerging()
                                 ->children()
                                     ->scalarNode('mapper_class')
-                                        ->defaultValue('Gdbots\Ncr\Search\Elastica\NodeMapper')
+                                        ->defaultValue(NodeMapper::class)
                                     ->end()
                                     ->scalarNode('index_name')->end()
                                     ->scalarNode('type_name')->end()
