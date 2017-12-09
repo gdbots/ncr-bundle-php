@@ -60,7 +60,7 @@ final class NcrExtension extends \Twig_Extension
      *
      * @param NodeRef|MessageRef|string $ref
      *
-     * @return Node|null
+     * @return Node
      *
      * @throws \Throwable
      */

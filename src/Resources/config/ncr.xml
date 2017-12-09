@@ -4,19 +4,24 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
   <services>
-    <service id="gdbots_ncr.ncr.memoizing" class="Gdbots\Ncr\Repository\MemoizingNcr" decorates="ncr" decoration-priority="-1000" public="false">
+    <defaults public="false"/>
+
+    <service id="gdbots_ncr.ncr.memoizing"
+        class="Gdbots\Ncr\Repository\MemoizingNcr"
+        decorates="ncr"
+        decoration-priority="-1000">
       <argument type="service" id="gdbots_ncr.ncr.memoizing.inner"/>
       <argument type="service" id="ncr_cache"/>
       <argument>%gdbots_ncr.ncr.memoizing.read_through%</argument>
     </service>
 
-    <service id="gdbots_ncr.ncr.psr6" class="%gdbots_ncr.ncr.psr6.class%" decorates="ncr" public="false">
+    <service id="gdbots_ncr.ncr.psr6" class="%gdbots_ncr.ncr.psr6.class%" decorates="ncr">
       <argument type="service" id="gdbots_ncr.ncr.psr6.inner"/>
       <argument type="service" id="cache.app"/>
       <argument>%gdbots_ncr.ncr.psr6.read_through%</argument>
     </service>
 
-    <service id="gdbots_ncr.ncr.dynamodb" class="%gdbots_ncr.ncr.dynamodb.class%" public="false">
+    <service id="gdbots_ncr.ncr.dynamodb" class="%gdbots_ncr.ncr.dynamodb.class%">
       <argument type="service" id="aws.dynamodb" on-invalid="ignore"/>
       <argument type="service" id="gdbots_ncr.ncr.dynamodb.table_manager"/>
       <argument>%gdbots_ncr.ncr.dynamodb.config%</argument>
@@ -24,7 +29,7 @@
       <tag name="monolog.logger" channel="ncr"/>
     </service>
 
-    <service id="gdbots_ncr.ncr.dynamodb.table_manager" class="%gdbots_ncr.ncr.dynamodb.table_manager.class%" public="false">
+    <service id="gdbots_ncr.ncr.dynamodb.table_manager" class="%gdbots_ncr.ncr.dynamodb.table_manager.class%">
       <argument>%gdbots_ncr.ncr.dynamodb.table_manager.table_name_prefix%</argument>
       <argument>%gdbots_ncr.ncr.dynamodb.table_manager.node_tables%</argument>
     </service>

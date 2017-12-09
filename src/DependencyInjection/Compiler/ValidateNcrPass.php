@@ -9,7 +9,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 /**
  * Checks the container to ensure that the NCR has the provider defined and that it's valid.
  */
-class ValidateNcrPass implements CompilerPassInterface
+final class ValidateNcrPass implements CompilerPassInterface
 {
     /**
      * @param ContainerBuilder $container

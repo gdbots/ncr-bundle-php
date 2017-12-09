@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class GetNodeCommand extends ContainerAwareCommand
+final class GetNodeCommand extends ContainerAwareCommand
 {
     use NcrCommandTrait;
 
@@ -21,7 +21,7 @@ class GetNodeCommand extends ContainerAwareCommand
      */
     public function __construct(Ncr $ncr)
     {
-        parent::__construct(null);
+        parent::__construct();
         $this->ncr = $ncr;
     }
 
@@ -37,7 +37,7 @@ class GetNodeCommand extends ContainerAwareCommand
 The <info>%command.name%</info> command will fetch a single node from the Ncr for the given 
 NodeRef provided and write the json value of the node to STDOUT.
 
-<info>php %command.full_name% --tenant-id=client1 'acme:article:123'</info>
+<info>php %command.full_name% --tenant-id=client1 --consistent 'acme:article:123'</info>
 
 EOF
             )
@@ -52,6 +52,12 @@ EOF
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Tenant Id to use for this operation.'
+            )
+            ->addOption(
+                'consistent',
+                null,
+                InputOption::VALUE_NONE,
+                'Fetches the node with a consistent read request.'
             )
             ->addOption(
                 'pretty',
@@ -82,9 +88,10 @@ EOF
         $context['tenant_id'] = (string)$input->getOption('tenant-id');
 
         $nodeRef = NodeRef::fromString($input->getArgument('node-ref'));
+        $consistent = $input->getOption('consistent') ? true : false;
 
         try {
-            $node = $this->ncr->getNode($nodeRef, true, $context);
+            $node = $this->ncr->getNode($nodeRef, $consistent, $context);
             echo json_encode($node, $input->getOption('pretty') ? JSON_PRETTY_PRINT : 0) . PHP_EOL;
         } catch (\Throwable $e) {
             $errOutput->writeln($e->getMessage());

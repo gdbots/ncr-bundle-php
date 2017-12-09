@@ -2,6 +2,16 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.0
+__BREAKING CHANGES__
+
+* Require `"gdbots/pbjx-bundle": "~0.3"` and `"gdbots/ncr": "~0.2"`.
+* Change composer type to `symfony-bundle`.
+* Add `pbjx.binder` tag to `gdbots_ncr.node_command_binder` service.
+* Remove `curie` attribute from `pbjx.handler` tag on `gdbots_ncr.get_node_batch_request_handler` service.
+* Mark all classes as final as they are not meant to be extended.
+
+
 ## v0.2.0
 __BREAKING CHANGES__
 
@@ -18,7 +28,6 @@ __BREAKING CHANGES__
 ## v0.1.1
 * Add support for Symfony 4.
 * Add `ncr:get-node` symfony console command.
-
 
 
 ## v0.1.0
