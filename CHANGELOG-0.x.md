@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.2
+* When using useAttributeAsKey in `Configuration` set `normalizeKeys(false)`.
+
+
 ## v0.3.1
 * Add service definition for `gdbots_ncr.node_etag_enricher` to ensure node's always get a new etag on create/update.
 
