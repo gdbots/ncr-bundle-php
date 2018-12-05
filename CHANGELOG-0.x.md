@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.4
+* Add service definition for `gdbots_ncr.node_idempotency_validator`.
+
+
 ## v0.3.3
 * Add service definition for `gdbots_ncr.unique_node_validator`.
 

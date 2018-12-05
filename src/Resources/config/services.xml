@@ -18,6 +18,13 @@
     </service>
 
     <!-- validators -->
+    <service id="gdbots_ncr.node_idempotency_validator" class="Gdbots\Ncr\Validator\NodeIdempotencyValidator">
+      <argument type="service" id="cache.app"/>
+      <argument>%gdbots_ncr.node_idempotency_validator.ttl%</argument>
+      <tag name="pbjx.event_subscriber"/>
+      <tag name="pbjx.validator"/>
+    </service>
+
     <service id="gdbots_ncr.unique_node_validator" class="Gdbots\Ncr\Validator\UniqueNodeValidator">
       <tag name="pbjx.event_subscriber"/>
       <tag name="pbjx.validator"/>
