@@ -51,6 +51,9 @@ final class GdbotsNcrExtension extends Extension
         // ncr_search
         $container->setParameter('gdbots_ncr.ncr_search.provider', $config['ncr_search']['provider']);
         $this->configureElasticaNcrSearch($config, $container, $config['ncr_search']['provider']);
+
+        // node_idempotency_validator
+        $container->setParameter('gdbots_ncr.node_idempotency_validator.ttl', $config['node_idempotency_validator']['ttl']);
     }
 
     /**
