@@ -6,6 +6,7 @@
   <services>
     <service id="gdbots_ncr.twig.ncr_extension" class="Gdbots\Bundle\NcrBundle\Twig\NcrExtension" public="false">
       <argument type="service" id="ncr_cache"/>
+      <argument type="service" id="ncr_preloader"/>
       <argument type="service" id="logger" on-invalid="ignore"/>
       <argument>%kernel.debug%</argument>
       <tag name="monolog.logger" channel="ncr"/>

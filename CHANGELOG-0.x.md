@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.6
+* Fix invalid service config for `gdbots_ncr.twig.ncr_extension`.
+
+
 ## v0.3.5
 * Add service definition for `ncr_preloader`.
 * Add twig functions to access NcrPreloader:
