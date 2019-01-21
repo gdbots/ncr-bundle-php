@@ -111,7 +111,7 @@ final class NcrExtension extends \Twig_Extension
      */
     public function getPreloadedNodes(): array
     {
-        $this->ncrPreloader->getNodes();
+        return $this->ncrPreloader->getNodes();
     }
 
     /**
@@ -119,7 +119,7 @@ final class NcrExtension extends \Twig_Extension
      */
     public function getPreloadedPublishedNodes(): array
     {
-        $this->ncrPreloader->getPublishedNodes();
+        return $this->ncrPreloader->getPublishedNodes();
     }
 
     /**

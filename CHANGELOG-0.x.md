@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.7
+* Actually return the preloaded nodes in the NcrExtension.
+
+
 ## v0.3.6
 * Fix invalid service config for `gdbots_ncr.twig.ncr_extension`.
 
