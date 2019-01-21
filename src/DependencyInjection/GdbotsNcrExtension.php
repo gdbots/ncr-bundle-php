@@ -6,6 +6,7 @@ namespace Gdbots\Bundle\NcrBundle\DependencyInjection;
 use Gdbots\Ncr\Ncr;
 use Gdbots\Ncr\NcrCache;
 use Gdbots\Ncr\NcrLazyLoader;
+use Gdbots\Ncr\NcrPreloader;
 use Gdbots\Ncr\NcrSearch;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
@@ -47,6 +48,7 @@ final class GdbotsNcrExtension extends Extension
         $container->setParameter('gdbots_ncr.ncr_cache.max_items', $config['ncr_cache']['max_items']);
         $container->setAlias(NcrCache::class, 'ncr_cache');
         $container->setAlias(NcrLazyLoader::class, 'ncr_lazy_loader');
+        $container->setAlias(NcrPreloader::class, 'ncr_preloader');
 
         // ncr_search
         $container->setParameter('gdbots_ncr.ncr_search.provider', $config['ncr_search']['provider']);

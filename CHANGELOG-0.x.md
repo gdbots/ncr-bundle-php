@@ -2,6 +2,15 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.5
+* Add service definition for `ncr_preloader`.
+* Add twig functions to access NcrPreloader:
+  * ncr_get_preloaded_nodes
+  * ncr_get_preloaded_published_nodes
+  * ncr_preload_node
+  * ncr_preload_nodes
+
+
 ## v0.3.4
 * Add service definition for `gdbots_ncr.node_idempotency_validator`.
 

@@ -6,6 +6,7 @@ namespace Gdbots\Bundle\NcrBundle\Twig;
 use Gdbots\Common\Util\ClassUtils;
 use Gdbots\Ncr\Exception\NodeNotFound;
 use Gdbots\Ncr\NcrCache;
+use Gdbots\Ncr\NcrPreloader;
 use Gdbots\Pbj\MessageRef;
 use Gdbots\Schemas\Ncr\Mixin\Node\Node;
 use Gdbots\Schemas\Ncr\NodeRef;
@@ -17,6 +18,9 @@ final class NcrExtension extends \Twig_Extension
     /** @var NcrCache */
     private $ncrCache;
 
+    /** @var NcrPreloader */
+    private $ncrPreloader;
+
     /** @var LoggerInterface */
     private $logger;
 
@@ -25,12 +29,18 @@ final class NcrExtension extends \Twig_Extension
 
     /**
      * @param NcrCache        $ncrCache
+     * @param NcrPreloader    $ncrPreloader
      * @param LoggerInterface $logger
      * @param bool            $debug
      */
-    public function __construct(NcrCache $ncrCache, ?LoggerInterface $logger = null, bool $debug = false)
-    {
+    public function __construct(
+        NcrCache $ncrCache,
+        NcrPreloader $ncrPreloader,
+        ?LoggerInterface $logger = null,
+        bool $debug = false
+    ) {
         $this->ncrCache = $ncrCache;
+        $this->ncrPreloader = $ncrPreloader;
         $this->logger = $logger ?: new NullLogger();
         $this->debug = $debug;
     }
@@ -42,6 +52,10 @@ final class NcrExtension extends \Twig_Extension
     {
         return [
             new \Twig_SimpleFunction('ncr_get_node', [$this, 'getNode']),
+            new \Twig_SimpleFunction('ncr_get_preloaded_nodes', [$this, 'getPreloadedNodes']),
+            new \Twig_SimpleFunction('ncr_get_preloaded_published_nodes', [$this, 'getPreloadedPublishedNodes']),
+            new \Twig_SimpleFunction('ncr_preload_node', [$this, 'preloadNode']),
+            new \Twig_SimpleFunction('ncr_preload_nodes', [$this, 'preloadNodes']),
         ];
     }
 
@@ -66,21 +80,12 @@ final class NcrExtension extends \Twig_Extension
      */
     public function getNode($ref): ?Node
     {
-        if (empty($ref)) {
+        $nodeRef = $this->refToNodeRef($ref);
+        if (!$nodeRef instanceof NodeRef) {
             return null;
         }
 
-        if ($ref instanceof MessageRef) {
-            $nodeRef = NodeRef::fromMessageRef($ref);
-        } else {
-            $nodeRef = $ref;
-        }
-
         try {
-            if (!$nodeRef instanceof NodeRef) {
-                $nodeRef = NodeRef::fromString((string)$nodeRef);
-            }
-
             return $this->ncrCache->getNode($nodeRef);
         } catch (NodeNotFound $e) {
             return null;
@@ -99,5 +104,86 @@ final class NcrExtension extends \Twig_Extension
         }
 
         return null;
+    }
+
+    /**
+     * @return Node[]
+     */
+    public function getPreloadedNodes(): array
+    {
+        $this->ncrPreloader->getNodes();
+    }
+
+    /**
+     * @return Node[]
+     */
+    public function getPreloadedPublishedNodes(): array
+    {
+        $this->ncrPreloader->getPublishedNodes();
+    }
+
+    /**
+     * Preloads a node so it can optionally be rendered later.
+     *
+     * @param NodeRef|MessageRef|string $ref
+     */
+    public function preloadNode($ref): void
+    {
+        $nodeRef = $this->refToNodeRef($ref);
+        if (!$nodeRef instanceof NodeRef) {
+            return;
+        }
+
+        try {
+            $this->ncrPreloader->addNodeRef($nodeRef);
+        } catch (\Throwable $e) {
+            if ($this->debug) {
+                throw $e;
+            }
+
+            $this->logger->error(
+                sprintf(
+                    '%s::Unable to process twig "ncr_preload_node" function for [{node_ref}].',
+                    ClassUtils::getShortName($e)
+                ),
+                ['exception' => $e, 'node_ref' => (string)$ref]
+            );
+        }
+    }
+
+    /**
+     * @param NodeRef[]|MessageRef[]|string[] $refs
+     */
+    public function preloadNodes(array $refs = []): void
+    {
+        foreach ($refs as $ref) {
+            $this->preloadNode($ref);
+        }
+    }
+
+    /**
+     * @param mixed $ref
+     *
+     * @return NodeRef
+     */
+    private function refToNodeRef($ref): ?NodeRef
+    {
+        if ($ref instanceof NodeRef) {
+            return $ref;
+        }
+
+        if (empty($ref)) {
+            return null;
+        }
+
+        if ($ref instanceof MessageRef) {
+            return NodeRef::fromMessageRef($ref);
+        }
+
+        try {
+            return NodeRef::fromString((string)$ref);
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 }

@@ -17,6 +17,11 @@
       <tag name="monolog.logger" channel="ncr"/>
     </service>
 
+    <service id="ncr_preloader" class="Gdbots\Ncr\NcrPreloader">
+      <argument type="service" id="ncr_lazy_loader"/>
+      <argument type="service" id="ncr_cache"/>
+    </service>
+
     <service id="gdbots_ncr.ncr_request_interceptor" class="Gdbots\Ncr\NcrRequestInterceptor">
       <argument type="service" id="ncr_cache"/>
       <tag name="pbjx.event_subscriber"/>
