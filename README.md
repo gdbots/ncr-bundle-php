@@ -147,7 +147,7 @@ Autowiring supported for these interfaces:
 
 
 # Twig Extension
-The `NcrExtension` provides one function called `ncr_get_node`.  It is important to note 
+The `NcrExtension` provides a function called `ncr_get_node`.  It is important to note 
 that this does __NOT__ make a query to get a node, instead it pulls from `NcrCache`.
 
 > This might change in the future, but this strategy eliminates horribly performing
@@ -162,6 +162,15 @@ __Example use of ncr_get_node:__
 Here is the creator:
 {{ created_by }}
 ```
+
+__Other twig functions (documentation wip):__
+
++ ncr_get_preloaded_nodes
++ ncr_get_preloaded_published_nodes
++ ncr_preload_node
++ ncr_preload_nodes
++ ncr_preload_embedded_nodes
++ ncr_to_node_ref
 
 
 # Console Commands

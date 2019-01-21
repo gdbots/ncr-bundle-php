@@ -7,7 +7,9 @@ use Gdbots\Common\Util\ClassUtils;
 use Gdbots\Ncr\Exception\NodeNotFound;
 use Gdbots\Ncr\NcrCache;
 use Gdbots\Ncr\NcrPreloader;
+use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageRef;
+use Gdbots\Pbj\WellKnown\Identifier;
 use Gdbots\Schemas\Ncr\Mixin\Node\Node;
 use Gdbots\Schemas\Ncr\NodeRef;
 use Psr\Log\LoggerInterface;
@@ -56,6 +58,8 @@ final class NcrExtension extends \Twig_Extension
             new \Twig_SimpleFunction('ncr_get_preloaded_published_nodes', [$this, 'getPreloadedPublishedNodes']),
             new \Twig_SimpleFunction('ncr_preload_node', [$this, 'preloadNode']),
             new \Twig_SimpleFunction('ncr_preload_nodes', [$this, 'preloadNodes']),
+            new \Twig_SimpleFunction('ncr_preload_embedded_nodes', [$this, 'preloadEmbeddedNodes']),
+            new \Twig_SimpleFunction('ncr_to_node_ref', [$this, 'toNodeRef']),
         ];
     }
 
@@ -80,7 +84,7 @@ final class NcrExtension extends \Twig_Extension
      */
     public function getNode($ref): ?Node
     {
-        $nodeRef = $this->refToNodeRef($ref);
+        $nodeRef = $this->toNodeRef($ref);
         if (!$nodeRef instanceof NodeRef) {
             return null;
         }
@@ -129,26 +133,12 @@ final class NcrExtension extends \Twig_Extension
      */
     public function preloadNode($ref): void
     {
-        $nodeRef = $this->refToNodeRef($ref);
+        $nodeRef = $this->toNodeRef($ref);
         if (!$nodeRef instanceof NodeRef) {
             return;
         }
 
-        try {
-            $this->ncrPreloader->addNodeRef($nodeRef);
-        } catch (\Throwable $e) {
-            if ($this->debug) {
-                throw $e;
-            }
-
-            $this->logger->error(
-                sprintf(
-                    '%s::Unable to process twig "ncr_preload_node" function for [{node_ref}].',
-                    ClassUtils::getShortName($e)
-                ),
-                ['exception' => $e, 'node_ref' => (string)$ref]
-            );
-        }
+        $this->ncrPreloader->addNodeRef($nodeRef);
     }
 
     /**
@@ -162,26 +152,35 @@ final class NcrExtension extends \Twig_Extension
     }
 
     /**
-     * @param mixed $ref
+     * @param Message[] $messages Array of messages to extract NodeRefs from.
+     * @param array     $paths    An associative array of ['field_name' => 'qname'], i.e. ['user_id', 'acme:user']
+     */
+    public function preloadEmbeddedNodes(array $messages, array $paths = []): void
+    {
+        $this->ncrPreloader->addEmbeddedNodeRefs($messages, $paths);
+    }
+
+    /**
+     * @param mixed $val
      *
      * @return NodeRef
      */
-    private function refToNodeRef($ref): ?NodeRef
+    public function toNodeRef($val): ?NodeRef
     {
-        if ($ref instanceof NodeRef) {
-            return $ref;
-        }
-
-        if (empty($ref)) {
+        if ($val instanceof NodeRef) {
+            return $val;
+        } else if (empty($val)) {
             return null;
-        }
-
-        if ($ref instanceof MessageRef) {
-            return NodeRef::fromMessageRef($ref);
+        } else if ($val instanceof MessageRef) {
+            return NodeRef::fromMessageRef($val);
+        } else if ($val instanceof Node) {
+            return NodeRef::fromNode($val);
+        } else if ($val instanceof Identifier && method_exists($val, 'toNodeRef')) {
+            return $val->toNodeRef();
         }
 
         try {
-            return NodeRef::fromString((string)$ref);
+            return NodeRef::fromString((string)$val);
         } catch (\Throwable $e) {
             return null;
         }

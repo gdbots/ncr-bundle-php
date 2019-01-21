@@ -2,6 +2,12 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.8
+* Add twig functions in NcrExtension:
+  * ncr_preload_embedded_nodes
+  * ncr_to_node_ref
+
+
 ## v0.3.7
 * Actually return the preloaded nodes in the NcrExtension.
 
