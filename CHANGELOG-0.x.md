@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.9
+* Update `gdbots_ncr.ncr_request_interceptor` service definition to provide `cache.app` as first argument since `gdbots/ncr` v0.3.11 adds caching for slug lookups.
+
+
 ## v0.3.8
 * Add twig functions in NcrExtension:
   * ncr_preload_embedded_nodes

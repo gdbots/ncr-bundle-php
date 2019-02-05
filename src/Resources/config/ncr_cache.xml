@@ -23,6 +23,7 @@
     </service>
 
     <service id="gdbots_ncr.ncr_request_interceptor" class="Gdbots\Ncr\NcrRequestInterceptor">
+      <argument type="service" id="cache.app"/>
       <argument type="service" id="ncr_cache"/>
       <tag name="pbjx.event_subscriber"/>
     </service>
