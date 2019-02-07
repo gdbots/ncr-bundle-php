@@ -2,6 +2,11 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.10
+* Add `$andClear` argument to `NcrExtension::getPreloaded[Published]Nodes(bool $andClear = true)` so twig functions `ncr_get_preloaded_nodes` and `ncr_get_preloaded_published_nodes` don't return the same preloaded nodes.
+* Add `NcrExtension::isNodePublished` and twig function `ncr_is_node_published`.
+
+
 ## v0.3.9
 * Update `gdbots_ncr.ncr_request_interceptor` service definition to provide `cache.app` as first argument since `gdbots/ncr` v0.3.11 adds caching for slug lookups.
 

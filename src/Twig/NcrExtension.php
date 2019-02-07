@@ -10,6 +10,7 @@ use Gdbots\Ncr\NcrPreloader;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\WellKnown\Identifier;
+use Gdbots\Schemas\Ncr\Enum\NodeStatus;
 use Gdbots\Schemas\Ncr\Mixin\Node\Node;
 use Gdbots\Schemas\Ncr\NodeRef;
 use Psr\Log\LoggerInterface;
@@ -56,6 +57,7 @@ final class NcrExtension extends \Twig_Extension
             new \Twig_SimpleFunction('ncr_get_node', [$this, 'getNode']),
             new \Twig_SimpleFunction('ncr_get_preloaded_nodes', [$this, 'getPreloadedNodes']),
             new \Twig_SimpleFunction('ncr_get_preloaded_published_nodes', [$this, 'getPreloadedPublishedNodes']),
+            new \Twig_SimpleFunction('ncr_is_node_published', [$this, 'isNodePublished']),
             new \Twig_SimpleFunction('ncr_preload_node', [$this, 'preloadNode']),
             new \Twig_SimpleFunction('ncr_preload_nodes', [$this, 'preloadNodes']),
             new \Twig_SimpleFunction('ncr_preload_embedded_nodes', [$this, 'preloadEmbeddedNodes']),
@@ -111,19 +113,47 @@ final class NcrExtension extends \Twig_Extension
     }
 
     /**
-     * @return Node[]
+     * @param Node $node
+     *
+     * @return bool
      */
-    public function getPreloadedNodes(): array
+    public function isNodePublished($node): bool
     {
-        return $this->ncrPreloader->getNodes();
+        if (!$node instanceof Node) {
+            return false;
+        }
+
+        return NodeStatus::PUBLISHED()->equals($node->get('status'));
     }
 
     /**
+     * @param bool $andClear
+     *
      * @return Node[]
      */
-    public function getPreloadedPublishedNodes(): array
+    public function getPreloadedNodes(bool $andClear = true): array
     {
-        return $this->ncrPreloader->getPublishedNodes();
+        $nodes = $this->ncrPreloader->getNodes();
+        if ($andClear) {
+            $this->ncrPreloader->clear();
+        }
+
+        return $nodes;
+    }
+
+    /**
+     * @param bool $andClear
+     *
+     * @return Node[]
+     */
+    public function getPreloadedPublishedNodes(bool $andClear = true): array
+    {
+        $nodes = $this->ncrPreloader->getPublishedNodes();
+        if ($andClear) {
+            $this->ncrPreloader->clear();
+        }
+
+        return $nodes;
     }
 
     /**
