@@ -24,7 +24,10 @@ final class GdbotsNcrExtension extends Extension
     public function load(array $config, ContainerBuilder $container)
     {
         $processor = new Processor();
-        $configuration = new Configuration($container->getParameter('kernel.environment'));
+        $env = $container->hasParameter('app_env')
+            ? $container->getParameter('app_env')
+            : $container->getParameter('kernel.environment');
+        $configuration = new Configuration($env);
 
         $config = $processor->processConfiguration($configuration, $config);
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
