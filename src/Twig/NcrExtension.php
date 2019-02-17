@@ -127,30 +127,32 @@ final class NcrExtension extends \Twig_Extension
     }
 
     /**
-     * @param bool $andClear
+     * @param bool   $andClear
+     * @param string $namespace
      *
      * @return Node[]
      */
-    public function getPreloadedNodes(bool $andClear = true): array
+    public function getPreloadedNodes(bool $andClear = true, string $namespace = NcrPreloader::DEFAULT_NAMESPACE): array
     {
-        $nodes = $this->ncrPreloader->getNodes();
+        $nodes = $this->ncrPreloader->getNodes(null, $namespace);
         if ($andClear) {
-            $this->ncrPreloader->clear();
+            $this->ncrPreloader->clear($namespace);
         }
 
         return $nodes;
     }
 
     /**
-     * @param bool $andClear
+     * @param bool   $andClear
+     * @param string $namespace
      *
      * @return Node[]
      */
-    public function getPreloadedPublishedNodes(bool $andClear = true): array
+    public function getPreloadedPublishedNodes(bool $andClear = true, string $namespace = NcrPreloader::DEFAULT_NAMESPACE): array
     {
-        $nodes = $this->ncrPreloader->getPublishedNodes();
+        $nodes = $this->ncrPreloader->getPublishedNodes($namespace);
         if ($andClear) {
-            $this->ncrPreloader->clear();
+            $this->ncrPreloader->clear($namespace);
         }
 
         return $nodes;
@@ -160,34 +162,40 @@ final class NcrExtension extends \Twig_Extension
      * Preloads a node so it can optionally be rendered later.
      *
      * @param NodeRef|MessageRef|string $ref
+     * @param string                    $namespace
      */
-    public function preloadNode($ref): void
+    public function preloadNode($ref, string $namespace = NcrPreloader::DEFAULT_NAMESPACE): void
     {
         $nodeRef = $this->toNodeRef($ref);
         if (!$nodeRef instanceof NodeRef) {
             return;
         }
 
-        $this->ncrPreloader->addNodeRef($nodeRef);
+        $this->ncrPreloader->addNodeRef($nodeRef, $namespace);
     }
 
     /**
      * @param NodeRef[]|MessageRef[]|string[] $refs
+     * @param string                          $namespace
      */
-    public function preloadNodes(array $refs = []): void
+    public function preloadNodes(array $refs = [], string $namespace = NcrPreloader::DEFAULT_NAMESPACE): void
     {
         foreach ($refs as $ref) {
-            $this->preloadNode($ref);
+            $this->preloadNode($ref, $namespace);
         }
     }
 
     /**
      * @param Message[] $messages Array of messages to extract NodeRefs from.
      * @param array     $paths    An associative array of ['field_name' => 'qname'], i.e. ['user_id', 'acme:user']
+     * @param string    $namespace
      */
-    public function preloadEmbeddedNodes(array $messages, array $paths = []): void
-    {
-        $this->ncrPreloader->addEmbeddedNodeRefs($messages, $paths);
+    public function preloadEmbeddedNodes(
+        array $messages,
+        array $paths = [],
+        string $namespace = NcrPreloader::DEFAULT_NAMESPACE
+    ): void {
+        $this->ncrPreloader->addEmbeddedNodeRefs($messages, $paths, $namespace);
     }
 
     /**

@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.12
+* Add optional namespace argument to all NcrExtension twig methods and pass through to NcrPreloader. 
+
+
 ## v0.3.11
 * Use `app_env` parameter if available instead of `kernel.environment`.
 
