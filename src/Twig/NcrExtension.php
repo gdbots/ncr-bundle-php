@@ -54,6 +54,7 @@ final class NcrExtension extends \Twig_Extension
     public function getFunctions()
     {
         return [
+            new \Twig_SimpleFunction('ncr_deref_nodes', [$this, 'derefNodes']),
             new \Twig_SimpleFunction('ncr_get_node', [$this, 'getNode']),
             new \Twig_SimpleFunction('ncr_get_preloaded_nodes', [$this, 'getPreloadedNodes']),
             new \Twig_SimpleFunction('ncr_get_preloaded_published_nodes', [$this, 'getPreloadedPublishedNodes']),
@@ -71,6 +72,24 @@ final class NcrExtension extends \Twig_Extension
     public function getName()
     {
         return 'gdbots_ncr_extension';
+    }
+
+    /**
+     * @see NcrCache::derefNodes
+     *
+     * @param Node   $node
+     * @param array  $fields
+     * @param string $return
+     *
+     * @return array
+     */
+    public function derefNodes($node, array $fields = [], ?string $return = null): array
+    {
+        if (!$node instanceof Node) {
+            return [];
+        }
+
+        return $this->ncrCache->derefNodes($node, $fields, $return);
     }
 
     /**
@@ -186,6 +205,8 @@ final class NcrExtension extends \Twig_Extension
     }
 
     /**
+     * @see NcrPreloader::addEmbeddedNodeRefs
+     *
      * @param Message[] $messages Array of messages to extract NodeRefs from.
      * @param array     $paths    An associative array of ['field_name' => 'qname'], i.e. ['user_id', 'acme:user']
      * @param string    $namespace

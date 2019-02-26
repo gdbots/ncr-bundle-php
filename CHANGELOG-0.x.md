@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.13
+* Add `NcrExtension::derefNodes` and twig function `ncr_deref_nodes`.
+
+
 ## v0.3.12
 * Add optional namespace argument to all NcrExtension twig methods and pass through to NcrPreloader. 
 

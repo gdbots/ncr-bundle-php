@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "require": {
     "php": ">=7.1",
-    "gdbots/ncr": "~0.2",
+    "gdbots/ncr": "^0.3.14 || ~0.4",
     "gdbots/pbjx-bundle": "~0.3"
   },
   "require-dev": {

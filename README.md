@@ -165,6 +165,7 @@ Here is the creator:
 
 __Other twig functions (documentation wip):__
 
++ ncr_deref_nodes
 + ncr_get_preloaded_nodes
 + ncr_get_preloaded_published_nodes
 + ncr_preload_node
