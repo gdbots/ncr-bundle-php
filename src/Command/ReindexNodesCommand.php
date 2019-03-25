@@ -107,13 +107,14 @@ EOF
     {
         $dryRun = $input->getOption('dry-run');
         $skipErrors = $input->getOption('skip-errors');
-        $batchSize = NumberUtils::bound($input->getOption('batch-size'), 1, 1000);
-        $batchDelay = NumberUtils::bound($input->getOption('batch-delay'), 100, 600000);
+        $batchSize = NumberUtils::bound($input->getOption('batch-size'), 1, 2000);
+        $batchDelay = NumberUtils::bound($input->getOption('batch-delay'), 10, 600000);
         $context = json_decode($input->getOption('context') ?: '{}', true);
         $context['tenant_id'] = (string)$input->getOption('tenant-id');
         $context['skip_errors'] = $skipErrors;
         $context['reindexing'] = true;
         $qname = $input->getArgument('qname') ? SchemaQName::fromString($input->getArgument('qname')) : null;
+        $context['reindex_all'] = null === $qname;
 
         $io = new SymfonyStyle($input, $output);
         $io->title(sprintf('Reindexing nodes for qname "%s"', $qname ?? 'ALL'));

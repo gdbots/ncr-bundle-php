@@ -5,6 +5,7 @@ namespace Gdbots\Bundle\NcrBundle\Command;
 
 use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Ncr\Ncr;
+use Gdbots\Pbj\SchemaQName;
 use Gdbots\Schemas\Ncr\Mixin\Node\Node;
 use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -91,10 +92,13 @@ EOF
         $output->setVerbosity(OutputInterface::VERBOSITY_QUIET);
         $errOutput->setVerbosity(OutputInterface::VERBOSITY_NORMAL);
 
-        $batchSize = NumberUtils::bound($input->getOption('batch-size'), 1, 1000);
-        $batchDelay = NumberUtils::bound($input->getOption('batch-delay'), 100, 600000);
+        $batchSize = NumberUtils::bound($input->getOption('batch-size'), 1, 2000);
+        $batchDelay = NumberUtils::bound($input->getOption('batch-delay'), 10, 600000);
         $context = json_decode($input->getOption('context') ?: '{}', true);
         $context['tenant_id'] = (string)$input->getOption('tenant-id');
+        $context['exporting'] = true;
+        $qname = $input->getArgument('qname') ? SchemaQName::fromString($input->getArgument('qname')) : null;
+        $context['exporting_all'] = null === $qname;
 
         $i = 0;
 
@@ -114,7 +118,7 @@ EOF
             }
         };
 
-        foreach ($this->getSchemasUsingMixin(NodeV1Mixin::create(), $input->getArgument('qname')) as $schema) {
+        foreach ($this->getSchemasUsingMixin(NodeV1Mixin::create(), (string)$qname ?: null) as $schema) {
             $this->ncr->pipeNodes($schema->getQName(), $receiver, $context);
         }
     }

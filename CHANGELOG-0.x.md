@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.14
+* Speed up `ncr:reindex-nodes` command by allowing larger batch size and smaller batch delay.
+
+
 ## v0.3.13
 * Add `NcrExtension::derefNodes` and twig function `ncr_deref_nodes`.
 
