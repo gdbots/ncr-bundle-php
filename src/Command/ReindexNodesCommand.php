@@ -109,7 +109,11 @@ EOF
         $skipErrors = $input->getOption('skip-errors');
         $batchSize = NumberUtils::bound($input->getOption('batch-size'), 1, 2000);
         $batchDelay = NumberUtils::bound($input->getOption('batch-delay'), 10, 600000);
-        $context = json_decode($input->getOption('context') ?: '{}', true);
+        $context = $input->getOption('context') ?: '{}';
+        if (strpos($context, '{') === false) {
+            $context = base64_decode($context);
+        }
+        $context = json_decode($context, true);
         $context['tenant_id'] = (string)$input->getOption('tenant-id');
         $context['skip_errors'] = $skipErrors;
         $context['reindexing'] = true;

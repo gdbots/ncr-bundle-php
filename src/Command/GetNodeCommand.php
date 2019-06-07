@@ -84,7 +84,11 @@ EOF
         $output->setVerbosity(OutputInterface::VERBOSITY_QUIET);
         $errOutput->setVerbosity(OutputInterface::VERBOSITY_NORMAL);
 
-        $context = json_decode($input->getOption('context') ?: '{}', true);
+        $context = $input->getOption('context') ?: '{}';
+        if (strpos($context, '{') === false) {
+            $context = base64_decode($context);
+        }
+        $context = json_decode($context, true);
         $context['tenant_id'] = (string)$input->getOption('tenant-id');
 
         $nodeRef = NodeRef::fromString($input->getArgument('node-ref'));

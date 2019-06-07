@@ -15,8 +15,10 @@ use Gdbots\Schemas\Ncr\Mixin\Node\Node;
 use Gdbots\Schemas\Ncr\NodeRef;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFunction;
 
-final class NcrExtension extends \Twig_Extension
+final class NcrExtension extends AbstractExtension
 {
     /** @var NcrCache */
     private $ncrCache;
@@ -54,15 +56,15 @@ final class NcrExtension extends \Twig_Extension
     public function getFunctions()
     {
         return [
-            new \Twig_SimpleFunction('ncr_deref_nodes', [$this, 'derefNodes']),
-            new \Twig_SimpleFunction('ncr_get_node', [$this, 'getNode']),
-            new \Twig_SimpleFunction('ncr_get_preloaded_nodes', [$this, 'getPreloadedNodes']),
-            new \Twig_SimpleFunction('ncr_get_preloaded_published_nodes', [$this, 'getPreloadedPublishedNodes']),
-            new \Twig_SimpleFunction('ncr_is_node_published', [$this, 'isNodePublished']),
-            new \Twig_SimpleFunction('ncr_preload_node', [$this, 'preloadNode']),
-            new \Twig_SimpleFunction('ncr_preload_nodes', [$this, 'preloadNodes']),
-            new \Twig_SimpleFunction('ncr_preload_embedded_nodes', [$this, 'preloadEmbeddedNodes']),
-            new \Twig_SimpleFunction('ncr_to_node_ref', [$this, 'toNodeRef']),
+            new TwigFunction('ncr_deref_nodes', [$this, 'derefNodes']),
+            new TwigFunction('ncr_get_node', [$this, 'getNode']),
+            new TwigFunction('ncr_get_preloaded_nodes', [$this, 'getPreloadedNodes']),
+            new TwigFunction('ncr_get_preloaded_published_nodes', [$this, 'getPreloadedPublishedNodes']),
+            new TwigFunction('ncr_is_node_published', [$this, 'isNodePublished']),
+            new TwigFunction('ncr_preload_node', [$this, 'preloadNode']),
+            new TwigFunction('ncr_preload_nodes', [$this, 'preloadNodes']),
+            new TwigFunction('ncr_preload_embedded_nodes', [$this, 'preloadEmbeddedNodes']),
+            new TwigFunction('ncr_to_node_ref', [$this, 'toNodeRef']),
         ];
     }
 
