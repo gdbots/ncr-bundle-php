@@ -2,8 +2,6 @@ ncr-bundle-php
 =============
 
 [![Build Status](https://api.travis-ci.org/gdbots/ncr-bundle-php.svg)](https://travis-ci.org/gdbots/ncr-bundle-php)
-[![Code Climate](https://codeclimate.com/github/gdbots/ncr-bundle-php/badges/gpa.svg)](https://codeclimate.com/github/gdbots/ncr-bundle-php)
-[![Test Coverage](https://codeclimate.com/github/gdbots/ncr-bundle-php/badges/coverage.svg)](https://codeclimate.com/github/gdbots/ncr-bundle-php/coverage)
 
 Symfony bundle that integrates [gdbots/ncr](https://github.com/gdbots/ncr-php) library.
 
@@ -134,8 +132,8 @@ services:
 
 
 # Controllers
-It is recommended to have data retrieval be the responsibility of Pbjx requests, however, 
-that strategy doesn't work for all uses cases.  Use Symfony autowiring and typehint the 
+It is recommended to have data retrieval be the responsibility of Pbjx requests, however,
+that strategy doesn't work for all uses cases.  Use Symfony autowiring and typehint the
 interface in your constructor or setter methods to get key Ncr services.
 
 Autowiring supported for these interfaces:
@@ -147,7 +145,7 @@ Autowiring supported for these interfaces:
 
 
 # Twig Extension
-The `NcrExtension` provides a function called `ncr_get_node`.  It is important to note 
+The `NcrExtension` provides a function called `ncr_get_node`.  It is important to note
 that this does __NOT__ make a query to get a node, instead it pulls from `NcrCache`.
 
 > This might change in the future, but this strategy eliminates horribly performing
