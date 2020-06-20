@@ -85,7 +85,7 @@ EOF
         $errOutput->setVerbosity(OutputInterface::VERBOSITY_NORMAL);
 
         $batchSize = NumberUtil::bound((int)$input->getOption('batch-size'), 1, 2000);
-        $batchDelay = NumberUtil::bound((int)$input->getOption('batch-delay'), 100, 600000);
+        $batchDelay = NumberUtil::bound((int)$input->getOption('batch-delay'), 10, 600000);
         $context = $input->getOption('context') ?: '{}';
         if (strpos($context, '{') === false) {
             $context = base64_decode($context);
