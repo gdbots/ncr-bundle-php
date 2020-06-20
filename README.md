@@ -61,12 +61,12 @@ gdbots_ncr:
       config:
         # these apply to batch get operations
         batch_size: 100 # default
-        pool_size: 25 # default
+        concurrency: 25 # default
       table_manager:
         # multi-tenant applications will likely need to provide a custom
         # table manager so node tables can be derived at runtime.
         # class: Acme\Ncr\Repository\DynamoDb\TableManager
-        table_name_prefix: my-ncr # defaults to: "%kernel.environment%-ncr"
+        table_name_prefix: my-ncr
         node_tables:
           # any SchemaCurie not defined here will end up using the default
           # the entire default key is not needed unless you're changing it
@@ -92,7 +92,7 @@ gdbots_ncr:
       index_manager:
         # multi-tenant apps will probably need to use a custom class
         #class: Acme\Ncr\Search\Elastica\IndexManager
-        index_prefix: my-ncr # defaults to: "%kernel.environment%-ncr"
+        index_prefix: my-ncr
         indexes:
           default:
             number_of_shards: 5 # default
@@ -103,7 +103,6 @@ gdbots_ncr:
           # than the automatic handling would provide
           'acme:user':
             index_name: members # default is "default"
-            type_name: member # defaults to message of qname, i.e. "user" in this example
             mapper_class: Acme\Ncr\Search\Elastica\UserMapper
 
 # typically these would be in services.yml file.
@@ -177,13 +176,13 @@ This library provides the basics for creating and extracting data from the Ncr s
 Run the Symfony console and look for __ncr__ commands.
 
 ```txt
-ncr:create-search-storage           Creates the NcrSearch storage.
-ncr:create-storage                  Creates the Ncr storage.
-ncr:describe-search-storage         Describes the NcrSearch storage.
-ncr:describe-storage                Describes the Ncr storage.
-ncr:export-nodes                    Pipes nodes from the Ncr to STDOUT.
-ncr:get-node                        Fetches a single node by its NodeRef and writes to STDOUT.
-ncr:reindex-nodes                   Pipes nodes from the Ncr and reindexes them.
+ncr:create-search-storage    Creates the NcrSearch storage.
+ncr:create-storage           Creates the Ncr storage.
+ncr:describe-search-storage  Describes the NcrSearch storage.
+ncr:describe-storage         Describes the Ncr storage.
+ncr:export-nodes             Pipes nodes from the Ncr to STDOUT.
+ncr:get-node                 Fetches a single node by its NodeRef and writes to STDOUT.
+ncr:reindex-nodes            Pipes nodes from the Ncr and reindexes them.
 ```
 
 Review the `--help` on the ncr commands for more details.

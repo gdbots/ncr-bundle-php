@@ -11,9 +11,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 final class ValidateNcrPass implements CompilerPassInterface
 {
-    /**
-     * @param ContainerBuilder $container
-     */
     public function process(ContainerBuilder $container)
     {
         if (!$container->hasParameter('gdbots_ncr.ncr.provider')) {
@@ -34,12 +31,6 @@ final class ValidateNcrPass implements CompilerPassInterface
         }
     }
 
-    /**
-     * @param ContainerBuilder $container
-     * @param string           $provider
-     *
-     * @throws \LogicException
-     */
     private function ensureProviderExists(ContainerBuilder $container, string $provider): void
     {
         $serviceId = "gdbots_ncr.ncr.{$provider}";
@@ -56,11 +47,6 @@ final class ValidateNcrPass implements CompilerPassInterface
         );
     }
 
-    /**
-     * @param ContainerBuilder $container
-     *
-     * @throws \LogicException
-     */
     private function validateDynamoDbProvider(ContainerBuilder $container): void
     {
         if (!$container->hasDefinition('aws.dynamodb')) {

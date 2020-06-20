@@ -8,4 +8,3 @@ __BREAKING CHANGES__
 * Upgrade to support Symfony 5 and PHP 7.4.
 * Uses `"gdbots/ncr": "^2.0"`
 * Make commands lazy by using the symfony static name.
-

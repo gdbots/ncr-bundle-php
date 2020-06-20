@@ -12,9 +12,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 final class ValidateNcrSearchPass implements CompilerPassInterface
 {
-    /**
-     * @param ContainerBuilder $container
-     */
     public function process(ContainerBuilder $container)
     {
         if (!$container->hasParameter('gdbots_ncr.ncr_search.provider')) {
@@ -35,12 +32,6 @@ final class ValidateNcrSearchPass implements CompilerPassInterface
         }
     }
 
-    /**
-     * @param ContainerBuilder $container
-     * @param string           $provider
-     *
-     * @throws \LogicException
-     */
     private function ensureProviderExists(ContainerBuilder $container, string $provider): void
     {
         $serviceId = "gdbots_ncr.ncr_search.{$provider}";
@@ -57,12 +48,7 @@ final class ValidateNcrSearchPass implements CompilerPassInterface
         );
     }
 
-    /**
-     * @param ContainerBuilder $container
-     *
-     * @throws \LogicException
-     */
-    private function validateElasticaProvider(ContainerBuilder $container)
+    private function validateElasticaProvider(ContainerBuilder $container): void
     {
         // validate here
     }
