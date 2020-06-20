@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
-use Gdbots\Bundle\PbjxBundle\Command\PbjxAwareCommandTrait;
 use Gdbots\Ncr\Ncr;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\SchemaCurie;
@@ -19,9 +18,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 final class DescribeCommand extends Command
 {
-    use PbjxAwareCommandTrait;
-
     protected static $defaultName = 'ncr:describe';
+    protected ContainerInterface $container;
     protected Ncr $ncr;
 
     public function __construct(ContainerInterface $container, Ncr $ncr)

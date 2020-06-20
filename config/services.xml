@@ -7,7 +7,7 @@
     <defaults public="false"/>
 
     <prototype namespace="Gdbots\Bundle\NcrBundle\Command\"
-        resource="../../Command/*"
+        resource="../src/Command/*"
         autoconfigure="true"
         autowire="true"/>
 

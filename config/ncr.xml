@@ -23,6 +23,7 @@
 
     <service id="gdbots_ncr.ncr.dynamodb" class="%gdbots_ncr.ncr.dynamodb.class%">
       <argument type="service" id="aws.dynamodb" on-invalid="ignore"/>
+      <argument type="service" id="gdbots_pbjx.event_dispatcher"/>
       <argument type="service" id="gdbots_ncr.ncr.dynamodb.table_manager"/>
       <argument>%gdbots_ncr.ncr.dynamodb.config%</argument>
       <argument type="service" id="logger" on-invalid="ignore"/>

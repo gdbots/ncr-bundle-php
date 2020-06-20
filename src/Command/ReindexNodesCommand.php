@@ -3,48 +3,48 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
-use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Ncr\Ncr;
 use Gdbots\Ncr\NcrSearch;
+use Gdbots\Pbj\Message;
+use Gdbots\Pbj\MessageResolver;
+use Gdbots\Pbj\SchemaCurie;
 use Gdbots\Pbj\SchemaQName;
-use Gdbots\Schemas\Ncr\Mixin\Indexed\Indexed;
-use Gdbots\Schemas\Ncr\Mixin\Indexed\IndexedV1Mixin;
-use Gdbots\Schemas\Ncr\Mixin\Node\Node;
-use Gdbots\Schemas\Ncr\NodeRef;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Gdbots\Pbj\Util\NumberUtil;
+use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-final class ReindexNodesCommand extends ContainerAwareCommand
+final class ReindexNodesCommand extends Command
 {
-    use NcrCommandTrait;
+    protected static $defaultName = 'ncr:reindex-nodes';
+    protected ContainerInterface $container;
+    protected Ncr $ncr;
+    protected NcrSearch $ncrSearch;
 
-    /**
-     * @param Ncr       $ncr
-     * @param NcrSearch $ncrSearch
-     */
-    public function __construct(Ncr $ncr, NcrSearch $ncrSearch)
+    public function __construct(ContainerInterface $container, Ncr $ncr, NcrSearch $ncrSearch)
     {
-        parent::__construct();
+        $this->container = $container;
         $this->ncr = $ncr;
         $this->ncrSearch = $ncrSearch;
+        parent::__construct();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function configure()
     {
+        $provider = $this->container->getParameter('gdbots_ncr.ncr.provider');
+        $searchProvider = $this->container->getParameter('gdbots_ncr.ncr_search.provider');
+
         $this
-            ->setName('ncr:reindex-nodes')
             ->setDescription('Pipes nodes from the Ncr and reindexes them.')
+            ->setDescription("Pipes node from the Ncr ({$provider}) and reindexes them")
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command will pipe nodes from the Ncr for the given 
-SchemaQName if provided or all schemas having the mixin "gdbots:ncr:mixin:indexed" and 
-and reindex them into the NcrSearch service.
+The <info>%command.name%</info> command will pipe nodes from the Ncr ({$provider})
+for the given SchemaQName if provided or all nodes and reindex them into the NcrSearch ({$searchProvider}) service.
 
 <info>php %command.full_name% --dry-run --tenant-id=client1 'acme:article'</info>
 
@@ -95,20 +95,12 @@ EOF
             );
     }
 
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @return null
-     *
-     * @throws \Throwable
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $dryRun = $input->getOption('dry-run');
         $skipErrors = $input->getOption('skip-errors');
-        $batchSize = NumberUtils::bound($input->getOption('batch-size'), 1, 2000);
-        $batchDelay = NumberUtils::bound($input->getOption('batch-delay'), 10, 600000);
+        $batchSize = NumberUtil::bound((int)$input->getOption('batch-size'), 1, 2000);
+        $batchDelay = NumberUtil::bound((int)$input->getOption('batch-delay'), 10, 600000);
         $context = $input->getOption('context') ?: '{}';
         if (strpos($context, '{') === false) {
             $context = base64_decode($context);
@@ -122,108 +114,115 @@ EOF
 
         $io = new SymfonyStyle($input, $output);
         $io->title(sprintf('Reindexing nodes for qname "%s"', $qname ?? 'ALL'));
-        if (!$this->readyForNcrTraffic($io)) {
-            return;
-        }
+        $io->comment('context: ' . json_encode($context));
+        $io->newLine();
 
         $batch = 1;
         $i = 0;
         $reindexed = 0;
         $queue = [];
-        //$io->comment(sprintf('Processing batch %d for qname "%s".', $batch, $qname ?? 'ALL'));
-        $io->comment(sprintf('context: %s', json_encode($context)));
-        $io->newLine();
 
-        $receiver = function (Node $node) use (
-            $output,
-            $io,
-            $context,
-            $dryRun,
-            $skipErrors,
-            $batchSize,
-            $batchDelay,
-            &$batch,
-            &$reindexed,
-            &$i,
-            &$queue
-        ) {
-            if (!$node instanceof Indexed) {
-                $io->note(sprintf(
-                    'IGNORING - Node [%s] does not have mixin [gdbots:ncr:mixin:indexed].',
-                    NodeRef::fromNode($node)
-                ));
-                return;
-            }
-
-            ++$i;
-            $output->writeln(
-                sprintf(
-                    '<info>%d.</info> <comment>node_ref:</comment>%s, <comment>status:</comment>%s, ' .
-                    '<comment>etag:</comment>%s, <comment>title:</comment>%s',
-                    $i,
-                    NodeRef::fromNode($node),
-                    $node->get('status'),
-                    $node->get('etag'),
-                    $node->get('title')
-                )
+        $qnames = $qname
+            ? [$qname]
+            : array_map(
+                fn(string $curie) => SchemaCurie::fromString($curie)->getQName(),
+                MessageResolver::findAllUsingMixin(NodeV1Mixin::SCHEMA_CURIE_MAJOR, false)
             );
-            $queue[] = $node->freeze();
 
-            if (count($queue) >= $batchSize) {
-                $nodes = $queue;
-                $queue = [];
-                $this->reindex($nodes, $reindexed, $io, $context, $batch, $dryRun, $skipErrors);
-                ++$batch;
+        foreach ($qnames as $q) {
+            /** @var Message $node */
+            foreach ($this->ncr->pipeNodes($q, $context) as $node) {
+                ++$i;
+                $queue[] = $node->freeze();
 
-                if ($batchDelay > 0) {
-                    //$io->newLine();
-                    //$io->note(sprintf('Pausing for %d milliseconds.', $batchDelay));
+                $output->writeln(
+                    sprintf(
+                        '<info>%d.</info> <comment>node_ref:</comment>%s, <comment>status:</comment>%s, ' .
+                        '<comment>etag:</comment>%s, <comment>title:</comment>%s',
+                        $i,
+                        $node->generateNodeRef(),
+                        $node->get(NodeV1Mixin::STATUS_FIELD),
+                        $node->get(NodeV1Mixin::ETAG_FIELD),
+                        $node->get(NodeV1Mixin::TITLE_FIELD)
+                    )
+                );
+
+                if (count($queue) >= $batchSize) {
+                    $nodes = $queue;
+                    $queue = [];
+                    $reindexed += $this->reindexBatch($io, $nodes, $context, $batch, $dryRun, $skipErrors);
+                    ++$batch;
                     usleep($batchDelay * 1000);
                 }
-
-                //$io->comment(sprintf('Processing batch %d.', $batch));
-                //$io->newLine();
             }
-        };
-
-        foreach ($this->getSchemasUsingMixin(IndexedV1Mixin::create(), (string)$qname ?: null) as $schema) {
-            $this->ncr->pipeNodes($schema->getQName(), $receiver, $context);
         }
 
-        $this->reindex($queue, $reindexed, $io, $context, $batch, $dryRun, $skipErrors);
+        $reindexed += $this->reindexBatch($io, $queue, $context, $batch, $dryRun, $skipErrors);
         $io->newLine();
-        $io->success(sprintf('Reindexed %s nodes for qname "%s".', number_format($reindexed), $qname ?? 'ALL'));
+        $io->success(sprintf(
+            'Reindexed %s of %s nodes for qname "%s".',
+            number_format($reindexed),
+            number_format($i),
+            $qname ?? 'ALL'
+        ));
+
+        return self::SUCCESS;
     }
 
-    /**
-     * @param array        $nodes
-     * @param int          $reindexed
-     * @param SymfonyStyle $io
-     * @param array        $context
-     * @param int          $batch
-     * @param bool         $dryRun
-     * @param bool         $skipErrors
-     *
-     * @throws \Throwable
-     */
-    protected function reindex(array $nodes, int &$reindexed, SymfonyStyle $io, array $context, int $batch, bool $dryRun = false, bool $skipErrors = false): void
+    protected function reindexBatch(SymfonyStyle $io, array $nodes, array $context, int $batch, bool $dryRun, bool $skipErrors): int
     {
+        if (empty($nodes)) {
+            return 0;
+        }
+
         if ($dryRun) {
             $io->note(sprintf('DRY RUN - Would reindex node batch %d here.', $batch));
-        } else {
-            try {
-                $this->ncrSearch->indexNodes($nodes, $context);
-            } catch (\Throwable $e) {
-                $io->error($e->getMessage());
-                $io->note(sprintf('Failed to index batch %d.', $batch));
-                $io->newLine(2);
+            return count($nodes);
+        }
 
-                if (!$skipErrors) {
-                    throw $e;
-                }
+        try {
+            return $this->reindex($nodes, $context, $skipErrors);
+        } catch (\Throwable $e) {
+            $io->error($e->getMessage());
+            $io->note(sprintf('Failed to index batch %d.', $batch));
+            $io->newLine(2);
+
+            if (!$skipErrors) {
+                throw $e;
             }
         }
 
-        $reindexed += count($nodes);
+        return 0;
+    }
+
+    protected function reindex(array $nodes, array $context, bool $skipErrors): int
+    {
+        $count = count($nodes);
+        if ($count === 0) {
+            return 0;
+        }
+
+        try {
+            $this->ncrSearch->indexNodes($nodes, $context);
+            return $count;
+        } catch (\Throwable $e) {
+            // in case of failure try again with smaller batch sizes and delay
+            $chunks = array_chunk($nodes, (int)(ceil($count / 10)));
+            $indexed = 0;
+
+            foreach ($chunks as $chunk) {
+                try {
+                    usleep(100000);
+                    $this->ncrSearch->indexNodes($chunk, $context);
+                    $indexed += count($chunk);
+                } catch (\Throwable $e2) {
+                    if (!$skipErrors) {
+                        throw $e2;
+                    }
+                }
+            }
+
+            return $indexed;
+        }
     }
 }

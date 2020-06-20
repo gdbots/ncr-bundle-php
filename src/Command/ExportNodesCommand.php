@@ -3,43 +3,43 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
-use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Ncr\Ncr;
+use Gdbots\Pbj\MessageResolver;
+use Gdbots\Pbj\SchemaCurie;
 use Gdbots\Pbj\SchemaQName;
-use Gdbots\Schemas\Ncr\Mixin\Node\Node;
+use Gdbots\Pbj\Util\NumberUtil;
 use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-final class ExportNodesCommand extends ContainerAwareCommand
+final class ExportNodesCommand extends Command
 {
-    use NcrCommandTrait;
+    protected static $defaultName = 'ncr:export-nodes';
+    protected ContainerInterface $container;
+    protected Ncr $ncr;
 
-    /**
-     * @param Ncr $ncr
-     */
-    public function __construct(Ncr $ncr)
+    public function __construct(ContainerInterface $container, Ncr $ncr)
     {
-        parent::__construct();
+        $this->container = $container;
         $this->ncr = $ncr;
+        parent::__construct();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function configure()
     {
+        $provider = $this->container->getParameter('gdbots_ncr.ncr.provider');
+
         $this
-            ->setName('ncr:export-nodes')
-            ->setDescription('Pipes nodes from the Ncr to STDOUT.')
+            ->setDescription("Pipes nodes from the Ncr ({$provider}) to STDOUT")
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command will pipe nodes from the Ncr for the given 
-SchemaQName if provided or all schemas having the mixin "gdbots:ncr:mixin:node" and 
-write the json value of the node on one line (json newline delimited) to STDOUT.
+The <info>%command.name%</info> command will pipe nodes from the Ncr ({$provider})
+for the given SchemaQName if provided or all nodes and write the json value of the
+node on one line (json newline delimited) to STDOUT.
 
 <info>php %command.full_name% --tenant-id=client1 'acme:article'</info>
 
@@ -78,22 +78,14 @@ EOF
             );
     }
 
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @return null
-     *
-     * @throws \Throwable
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $errOutput = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
         $output->setVerbosity(OutputInterface::VERBOSITY_QUIET);
         $errOutput->setVerbosity(OutputInterface::VERBOSITY_NORMAL);
 
-        $batchSize = NumberUtils::bound($input->getOption('batch-size'), 1, 2000);
-        $batchDelay = NumberUtils::bound($input->getOption('batch-delay'), 10, 600000);
+        $batchSize = NumberUtil::bound((int)$input->getOption('batch-size'), 1, 2000);
+        $batchDelay = NumberUtil::bound((int)$input->getOption('batch-delay'), 100, 600000);
         $context = $input->getOption('context') ?: '{}';
         if (strpos($context, '{') === false) {
             $context = base64_decode($context);
@@ -104,26 +96,30 @@ EOF
         $qname = $input->getArgument('qname') ? SchemaQName::fromString($input->getArgument('qname')) : null;
         $context['exporting_all'] = null === $qname;
 
+        $qnames = $qname
+            ? [$qname]
+            : array_map(
+                fn(string $curie) => SchemaCurie::fromString($curie)->getQName(),
+                MessageResolver::findAllUsingMixin(NodeV1Mixin::SCHEMA_CURIE_MAJOR, false)
+            );
+
         $i = 0;
+        foreach ($qnames as $qname) {
+            foreach ($this->ncr->pipeNodes($qname, $context) as $node) {
+                ++$i;
 
-        $receiver = function (Node $node) use ($errOutput, $batchSize, $batchDelay, &$i) {
-            ++$i;
+                try {
+                    echo json_encode($node) . PHP_EOL;
+                } catch (\Throwable $e) {
+                    $errOutput->writeln($e->getMessage());
+                }
 
-            try {
-                echo json_encode($node) . PHP_EOL;
-            } catch (\Exception $e) {
-                $errOutput->writeln($e->getMessage());
-            }
-
-            if (0 === $i % $batchSize) {
-                if ($batchDelay > 0) {
+                if (0 === $i % $batchSize) {
                     usleep($batchDelay * 1000);
                 }
             }
-        };
-
-        foreach ($this->getSchemasUsingMixin(NodeV1Mixin::create(), (string)$qname ?: null) as $schema) {
-            $this->ncr->pipeNodes($schema->getQName(), $receiver, $context);
         }
+
+        return self::SUCCESS;
     }
 }

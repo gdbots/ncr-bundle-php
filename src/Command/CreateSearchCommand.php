@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
-use Gdbots\Bundle\PbjxBundle\Command\PbjxAwareCommandTrait;
 use Gdbots\Ncr\NcrSearch;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\SchemaCurie;
@@ -19,9 +18,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 final class CreateSearchCommand extends Command
 {
-    use PbjxAwareCommandTrait;
-
     protected static $defaultName = 'ncr:create-search';
+    protected ContainerInterface $container;
     protected NcrSearch $ncrSearch;
 
     public function __construct(ContainerInterface $container, NcrSearch $ncrSearch)

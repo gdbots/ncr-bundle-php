@@ -119,7 +119,7 @@ final class Configuration implements ConfigurationInterface
                             ->defaultValue(TableManager::class)
                         ->end()
                         ->scalarNode('table_name_prefix')
-                            ->defaultValue('%env(default:app_env:CLOUD_ENV)%-ncr-'.NodeTable::SCHEMA_VERSION)
+                            ->defaultValue('%env(default:app_env:CLOUD_ENV)%-ncr-')
                         ->end()
                         ->arrayNode('node_tables')
                             ->useAttributeAsKey('name')
