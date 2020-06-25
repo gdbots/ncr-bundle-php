@@ -36,7 +36,27 @@
       <tag name="pbjx.enricher"/>
     </service>
 
+    <!-- command handlers -->
+    <service id="gdbots_ncr.create_node_handler" class="Gdbots\Ncr\CreateNodeHandler">
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.mark_node_as_pending_handler" class="Gdbots\Ncr\MarkNodeAsPendingHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.update_node_handler" class="Gdbots\Ncr\UpdateNodeHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
     <!-- request handlers -->
+    <service id="gdbots_ncr.get_node_request_handler" class="Gdbots\Ncr\GetNodeRequestHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
     <service id="gdbots_ncr.get_node_batch_request_handler" class="Gdbots\Ncr\GetNodeBatchRequestHandler">
       <argument type="service" id="ncr"/>
       <tag name="pbjx.handler"/>
