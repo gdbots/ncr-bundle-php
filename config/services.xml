@@ -44,6 +44,11 @@
       <tag name="pbjx.handler"/>
     </service>
 
+    <service id="gdbots_ncr.expire_node_handler" class="Gdbots\Ncr\ExpireNodeHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
     <service id="gdbots_ncr.mark_node_as_pending_handler" class="Gdbots\Ncr\MarkNodeAsPendingHandler">
       <argument type="service" id="ncr"/>
       <tag name="pbjx.handler"/>
