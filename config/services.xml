@@ -64,6 +64,11 @@
       <tag name="pbjx.handler"/>
     </service>
 
+    <service id="gdbots_ncr.unpublish_node_handler" class="Gdbots\Ncr\UnpublishNodeHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
     <service id="gdbots_ncr.update_node_handler" class="Gdbots\Ncr\UpdateNodeHandler">
       <argument type="service" id="ncr"/>
       <tag name="pbjx.handler"/>
