@@ -49,7 +49,17 @@
       <tag name="pbjx.handler"/>
     </service>
 
+    <service id="gdbots_ncr.mark_node_as_draft_handler" class="Gdbots\Ncr\MarkNodeAsDraftHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
     <service id="gdbots_ncr.mark_node_as_pending_handler" class="Gdbots\Ncr\MarkNodeAsPendingHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.rename_node_handler" class="Gdbots\Ncr\RenameNodeHandler">
       <argument type="service" id="ncr"/>
       <tag name="pbjx.handler"/>
     </service>
@@ -60,12 +70,16 @@
     </service>
 
     <!-- request handlers -->
-    <service id="gdbots_ncr.get_node_request_handler" class="Gdbots\Ncr\GetNodeRequestHandler">
+    <service id="gdbots_ncr.get_node_batch_request_handler" class="Gdbots\Ncr\GetNodeBatchRequestHandler">
       <argument type="service" id="ncr"/>
       <tag name="pbjx.handler"/>
     </service>
 
-    <service id="gdbots_ncr.get_node_batch_request_handler" class="Gdbots\Ncr\GetNodeBatchRequestHandler">
+    <service id="gdbots_ncr.get_node_history_request_handler" class="Gdbots\Ncr\GetNodeHistoryRequestHandler">
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.get_node_request_handler" class="Gdbots\Ncr\GetNodeRequestHandler">
       <argument type="service" id="ncr"/>
       <tag name="pbjx.handler"/>
     </service>
