@@ -5,6 +5,7 @@
 
   <parameters>
     <parameter key="env(NCR_PROJECTOR_ENABLED)">true</parameter>
+    <parameter key="env(NCR_PROJECTOR_ENABLED)">true</parameter>
   </parameters>
 
   <services>
@@ -49,6 +50,11 @@
       <tag name="pbjx.handler"/>
     </service>
 
+    <service id="gdbots_ncr.lock_node_handler" class="Gdbots\Ncr\LockNodeHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
     <service id="gdbots_ncr.mark_node_as_draft_handler" class="Gdbots\Ncr\MarkNodeAsDraftHandler">
       <argument type="service" id="ncr"/>
       <tag name="pbjx.handler"/>
@@ -59,7 +65,18 @@
       <tag name="pbjx.handler"/>
     </service>
 
+    <service id="gdbots_ncr.publish_node_handler" class="Gdbots\Ncr\PublishNodeHandler">
+      <argument type="service" id="ncr"/>
+      <argument>%env(default::LOCAL_TIMEZONE)%</argument>
+      <tag name="pbjx.handler"/>
+    </service>
+
     <service id="gdbots_ncr.rename_node_handler" class="Gdbots\Ncr\RenameNodeHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.unlock_node_handler" class="Gdbots\Ncr\UnlockNodeHandler">
       <argument type="service" id="ncr"/>
       <tag name="pbjx.handler"/>
     </service>
