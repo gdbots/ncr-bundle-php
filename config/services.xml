@@ -87,7 +87,6 @@
     </service>
 
     <service id="gdbots_ncr.update_node_handler" class="Gdbots\Ncr\UpdateNodeHandler">
-      <argument type="service" id="ncr"/>
       <tag name="pbjx.handler"/>
     </service>
 
