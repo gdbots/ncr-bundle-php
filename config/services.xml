@@ -5,7 +5,6 @@
 
   <parameters>
     <parameter key="env(NCR_PROJECTOR_ENABLED)">true</parameter>
-    <parameter key="env(NCR_PROJECTOR_ENABLED)">true</parameter>
   </parameters>
 
   <services>
@@ -17,20 +16,20 @@
         autowire="true"/>
 
     <!-- binders -->
-    <service id="gdbots_ncr.node_command_binder" class="Gdbots\Ncr\Binder\NodeCommandBinder">
+    <service id="gdbots_ncr.node_command_binder" class="Gdbots\Ncr\NodeCommandBinder">
       <tag name="pbjx.event_subscriber"/>
       <tag name="pbjx.binder"/>
     </service>
 
     <!-- validators -->
-    <service id="gdbots_ncr.node_idempotency_validator" class="Gdbots\Ncr\Validator\NodeIdempotencyValidator">
+    <service id="gdbots_ncr.node_idempotency_validator" class="Gdbots\Ncr\NodeIdempotencyValidator">
       <argument type="service" id="cache.app"/>
       <argument>%gdbots_ncr.node_idempotency_validator.ttl%</argument>
       <tag name="pbjx.event_subscriber"/>
       <tag name="pbjx.validator"/>
     </service>
 
-    <service id="gdbots_ncr.unique_node_validator" class="Gdbots\Ncr\Validator\UniqueNodeValidator">
+    <service id="gdbots_ncr.unique_node_validator" class="Gdbots\Ncr\UniqueNodeValidator">
       <tag name="pbjx.event_subscriber"/>
       <tag name="pbjx.validator"/>
     </service>
@@ -105,7 +104,11 @@
       <tag name="pbjx.handler"/>
     </service>
 
-    <!-- projectors -->
+    <!-- projectors/watchers -->
+    <service id="gdbots_ncr.expirable_watcher" class="Gdbots\Ncr\ExpirableWatcher">
+      <tag name="pbjx.event_subscriber"/>
+    </service>
+
     <service id="gdbots_ncr.ncr_projector" class="Gdbots\Ncr\NcrProjector">
       <argument type="service" id="ncr"/>
       <argument type="service" id="ncr_search"/>
