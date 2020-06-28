@@ -7,7 +7,9 @@ use Gdbots\Ncr\Exception\NodeNotFound;
 use Gdbots\Ncr\NcrCache;
 use Gdbots\Ncr\NcrPreloader;
 use Gdbots\Pbj\Message;
+use Gdbots\Pbj\Util\ClassUtil;
 use Gdbots\Pbj\WellKnown\MessageRef;
+use Gdbots\Pbj\WellKnown\NodeRef;
 use Gdbots\Schemas\Ncr\Enum\NodeStatus;
 use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
 use Psr\Log\LoggerInterface;
@@ -20,7 +22,7 @@ final class NcrExtension extends AbstractExtension
     private NcrCache $ncrCache;
     private NcrPreloader $ncrPreloader;
     private LoggerInterface $logger;
-    private bool $debug = false;
+    private bool $debug;
 
     public function __construct(
         NcrCache $ncrCache,
@@ -97,7 +99,7 @@ final class NcrExtension extends AbstractExtension
             $this->logger->error(
                 sprintf(
                     '%s::Unable to process twig "ncr_get_node" function for [{node_ref}].',
-                    ClassUtils::getShortName($e)
+                    ClassUtil::getShortName($e)
                 ),
                 ['exception' => $e, 'node_ref' => (string)$nodeRef]
             );

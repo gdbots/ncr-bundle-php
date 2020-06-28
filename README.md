@@ -116,7 +116,7 @@ services:
       - '%es_clusters%'
       - '@logger'
     tags:
-      - {name: monolog.logger, channel: ncr_search}
+      - {name: monolog.logger, channel: ncr}
 
   # recommended, create your own lazy loading handler
   # to optimize batch requests.
@@ -176,13 +176,13 @@ This library provides the basics for creating and extracting data from the Ncr s
 Run the Symfony console and look for __ncr__ commands.
 
 ```txt
-ncr:create-search-storage    Creates the NcrSearch storage.
-ncr:create-storage           Creates the Ncr storage.
-ncr:describe-search-storage  Describes the NcrSearch storage.
-ncr:describe-storage         Describes the Ncr storage.
-ncr:export-nodes             Pipes nodes from the Ncr to STDOUT.
-ncr:get-node                 Fetches a single node by its NodeRef and writes to STDOUT.
-ncr:reindex-nodes            Pipes nodes from the Ncr and reindexes them.
+ncr:create-search    Creates the NcrSearch storage.
+ncr:create           Creates the Ncr storage.
+ncr:describe-search  Describes the NcrSearch storage.
+ncr:describe         Describes the Ncr storage.
+ncr:export-nodes     Pipes nodes from the Ncr to STDOUT.
+ncr:get-node         Fetches a single node by its NodeRef and writes to STDOUT.
+ncr:reindex-nodes    Pipes nodes from the Ncr and reindexes them.
 ```
 
 Review the `--help` on the ncr commands for more details.
