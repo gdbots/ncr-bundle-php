@@ -3,6 +3,10 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
+  <parameters>
+    <parameter key="env(NCR_PROJECTOR_ENABLED)">true</parameter>
+  </parameters>
+
   <services>
     <defaults public="false"/>
 
@@ -12,34 +16,110 @@
         autowire="true"/>
 
     <!-- binders -->
-    <service id="gdbots_ncr.node_command_binder" class="Gdbots\Ncr\Binder\NodeCommandBinder">
+    <service id="gdbots_ncr.node_command_binder" class="Gdbots\Ncr\NodeCommandBinder">
       <tag name="pbjx.event_subscriber"/>
       <tag name="pbjx.binder"/>
     </service>
 
     <!-- validators -->
-    <service id="gdbots_ncr.node_idempotency_validator" class="Gdbots\Ncr\Validator\NodeIdempotencyValidator">
+    <service id="gdbots_ncr.node_idempotency_validator" class="Gdbots\Ncr\NodeIdempotencyValidator">
       <argument type="service" id="cache.app"/>
       <argument>%gdbots_ncr.node_idempotency_validator.ttl%</argument>
       <tag name="pbjx.event_subscriber"/>
       <tag name="pbjx.validator"/>
     </service>
 
-    <service id="gdbots_ncr.unique_node_validator" class="Gdbots\Ncr\Validator\UniqueNodeValidator">
+    <service id="gdbots_ncr.unique_node_validator" class="Gdbots\Ncr\UniqueNodeValidator">
       <tag name="pbjx.event_subscriber"/>
       <tag name="pbjx.validator"/>
     </service>
 
-    <!-- enrichers -->
-    <service id="gdbots_ncr.node_etag_enricher" class="Gdbots\Ncr\Enricher\NodeEtagEnricher">
-      <tag name="pbjx.event_subscriber"/>
-      <tag name="pbjx.enricher"/>
+    <!-- command handlers -->
+    <service id="gdbots_ncr.create_node_handler" class="Gdbots\Ncr\CreateNodeHandler">
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.delete_node_handler" class="Gdbots\Ncr\DeleteNodeHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.expire_node_handler" class="Gdbots\Ncr\ExpireNodeHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.lock_node_handler" class="Gdbots\Ncr\LockNodeHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.mark_node_as_draft_handler" class="Gdbots\Ncr\MarkNodeAsDraftHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.mark_node_as_pending_handler" class="Gdbots\Ncr\MarkNodeAsPendingHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.publish_node_handler" class="Gdbots\Ncr\PublishNodeHandler">
+      <argument type="service" id="ncr"/>
+      <argument>%env(default::LOCAL_TIMEZONE)%</argument>
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.rename_node_handler" class="Gdbots\Ncr\RenameNodeHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.unlock_node_handler" class="Gdbots\Ncr\UnlockNodeHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.unpublish_node_handler" class="Gdbots\Ncr\UnpublishNodeHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.update_node_handler" class="Gdbots\Ncr\UpdateNodeHandler">
+      <tag name="pbjx.handler"/>
     </service>
 
     <!-- request handlers -->
     <service id="gdbots_ncr.get_node_batch_request_handler" class="Gdbots\Ncr\GetNodeBatchRequestHandler">
       <argument type="service" id="ncr"/>
       <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.get_node_history_request_handler" class="Gdbots\Ncr\GetNodeHistoryRequestHandler">
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.get_node_request_handler" class="Gdbots\Ncr\GetNodeRequestHandler">
+      <argument type="service" id="ncr"/>
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <!-- projectors -->
+    <service id="gdbots_ncr.ncr_projector" class="Gdbots\Ncr\NcrProjector">
+      <argument type="service" id="ncr"/>
+      <argument type="service" id="ncr_search"/>
+      <argument>%env(bool:NCR_PROJECTOR_ENABLED)%</argument>
+      <tag name="pbjx.event_subscriber"/>
+      <tag name="pbjx.projector"/>
+    </service>
+
+    <!-- watchers -->
+    <service id="gdbots_ncr.expirable_watcher" class="Gdbots\Ncr\ExpirableWatcher">
+      <tag name="pbjx.event_subscriber"/>
+    </service>
+
+    <service id="gdbots_ncr.publishable_watcher" class="Gdbots\Ncr\PublishableWatcher">
+      <tag name="pbjx.event_subscriber"/>
     </service>
   </services>
 
