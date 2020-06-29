@@ -114,7 +114,7 @@ final class NcrExtension extends AbstractExtension
             return false;
         }
 
-        return NodeStatus::PUBLISHED()->equals($node->get(NodeV1Mixin::STATUS_FIELD));
+        return NodeStatus::PUBLISHED === $node->fget(NodeV1Mixin::STATUS_FIELD);
     }
 
     /**
