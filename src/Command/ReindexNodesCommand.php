@@ -135,17 +135,15 @@ EOF
                 ++$i;
                 $queue[] = $node->freeze();
 
-                $output->writeln(
-                    sprintf(
-                        '<info>%d.</info> <comment>node_ref:</comment>%s, <comment>status:</comment>%s, ' .
-                        '<comment>etag:</comment>%s, <comment>title:</comment>%s',
-                        $i,
-                        $node->generateNodeRef(),
-                        $node->get(NodeV1Mixin::STATUS_FIELD),
-                        $node->get(NodeV1Mixin::ETAG_FIELD),
-                        $node->get(NodeV1Mixin::TITLE_FIELD)
-                    )
-                );
+                $io->text(sprintf(
+                    '<info>%d.</info> <comment>node_ref:</comment>%s, <comment>status:</comment>%s, ' .
+                    '<comment>etag:</comment>%s, <comment>title:</comment>%s',
+                    $i,
+                    $node->generateNodeRef(),
+                    $node->get(NodeV1Mixin::STATUS_FIELD),
+                    $node->get(NodeV1Mixin::ETAG_FIELD),
+                    $node->get(NodeV1Mixin::TITLE_FIELD)
+                ));
 
                 if (count($queue) >= $batchSize) {
                     $nodes = $queue;

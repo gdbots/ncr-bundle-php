@@ -17,10 +17,6 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 final class GdbotsNcrExtension extends Extension
 {
-    /**
-     * @param array            $config
-     * @param ContainerBuilder $container
-     */
     public function load(array $config, ContainerBuilder $container)
     {
         $processor = new Processor();
@@ -92,8 +88,8 @@ final class GdbotsNcrExtension extends Extension
         $container->setParameter("{$service}.table_manager.table_name_prefix", $dynamodb['table_manager']['table_name_prefix']);
         $container->setParameter("{$service}.table_manager.node_tables", $dynamodb['table_manager']['node_tables']);
         $container->setParameter("{$service}.config", [
-            'batch_size' => $dynamodb['config']['batch_size'],
-            'concurrency'  => $dynamodb['config']['concurrency'],
+            'batch_size'  => $dynamodb['config']['batch_size'],
+            'concurrency' => $dynamodb['config']['concurrency'],
         ]);
 
         $container->setAlias('ncr', $service);

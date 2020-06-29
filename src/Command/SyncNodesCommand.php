@@ -5,6 +5,7 @@ namespace Gdbots\Bundle\NcrBundle\Command;
 
 use Gdbots\Ncr\AggregateResolver;
 use Gdbots\Ncr\Ncr;
+use Gdbots\Ncr\NcrSearch;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\SchemaCurie;
@@ -16,7 +17,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -26,12 +26,14 @@ final class SyncNodesCommand extends Command
     protected static $defaultName = 'ncr:sync-nodes';
     protected ContainerInterface $container;
     protected Ncr $ncr;
+    protected NcrSearch $ncrSearch;
     protected Pbjx $pbjx;
 
-    public function __construct(ContainerInterface $container, Ncr $ncr, Pbjx $pbjx)
+    public function __construct(ContainerInterface $container, Ncr $ncr, NcrSearch $ncrSearch, Pbjx $pbjx)
     {
         $this->container = $container;
         $this->ncr = $ncr;
+        $this->ncrSearch = $ncrSearch;
         $this->pbjx = $pbjx;
         parent::__construct();
     }
@@ -39,16 +41,18 @@ final class SyncNodesCommand extends Command
     protected function configure()
     {
         $provider = $this->container->getParameter('gdbots_ncr.ncr.provider');
+        $searchProvider = $this->container->getParameter('gdbots_ncr.ncr_search.provider');
+        $eventStoreProvider = $this->container->getParameter('gdbots_pbjx.event_store.provider');
 
         $this
-            ->setDescription("Pipes nodes from the Ncr ({$provider}) to STDOUT")
+            ->setDescription("Syncs nodes from the Ncr ({$provider}) with the EventStore ({$eventStoreProvider}).")
             ->setHelp(<<<EOF
 The <info>%command.name%</info> command will pipe nodes from the Ncr ({$provider})
 for the given SchemaQName if provided or all nodes and load the node's aggregate,
-perform a sync (reading all events in its stream and applying them to local state)
-and then update the node in the Ncr ({$provider}) with the synced value.
+perform a sync with the EventStore ({$eventStoreProvider}) and then update the node
+in the Ncr ({$provider}) and NcrSearch ({$searchProvider}) with the synced value.
 
-<warning>This can take a long time to run!</warning>
+<error> WARNING </error> This can take a LONG time to run.
 
 <info>php %command.full_name% --tenant-id=client1 'acme:article'</info>
 
@@ -89,10 +93,6 @@ EOF
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $errOutput = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
-        $output->setVerbosity(OutputInterface::VERBOSITY_QUIET);
-        $errOutput->setVerbosity(OutputInterface::VERBOSITY_NORMAL);
-
         $batchSize = NumberUtil::bound((int)$input->getOption('batch-size'), 1, 2000);
         $batchDelay = NumberUtil::bound((int)$input->getOption('batch-delay'), 10, 600000);
         $context = $input->getOption('context') ?: '{}';
@@ -124,42 +124,34 @@ EOF
             /** @var Message $node */
             foreach ($this->ncr->pipeNodes($qname, $context) as $node) {
                 ++$i;
-
                 $nodeRef = $node->generateNodeRef();
-                $io->text(
-                    sprintf(
-                        '<info>%d.</info> <comment>node_ref:</comment>%s, <comment>status:</comment>%s, ' .
-                        '<comment>etag:</comment>%s, <comment>title:</comment>%s',
-                        $i,
-                        $nodeRef,
-                        $node->get(NodeV1Mixin::STATUS_FIELD),
-                        $node->get(NodeV1Mixin::ETAG_FIELD),
-                        $node->get(NodeV1Mixin::TITLE_FIELD)
-                    )
-                );
 
                 try {
                     $expectedEtag = $node->get(NodeV1Mixin::ETAG_FIELD);
                     $aggregate = AggregateResolver::resolve($nodeRef->getQName())::fromNode($node, $this->pbjx);
                     $aggregate->sync($context);
+
                     if ($aggregate->getEtag() !== $expectedEtag) {
-                        $this->ncr->putNode($aggregate->getNode(), $expectedEtag, $context);
-                        $io->warning(
-                            sprintf(
-                                '<info>%d.</info> <comment>node_ref:</comment>%s, <comment>new_etag:</comment>%s',
-                                $i,
-                                $nodeRef,
-                                $aggregate->getEtag()
-                            )
-                        );
-                    } else {
-                        $io->text(
-                            sprintf('<info>%d.</info> <comment>node_ref:</comment>%s CURRENT', $i, $nodeRef)
-                        );
+                        $node = $aggregate->getNode();
+                        $this->ncr->putNode($node, $expectedEtag, $context);
+                        $this->ncrSearch->indexNodes([$node], $context);
                     }
+
+                    $io->text(sprintf(
+                        '<info>%d.</info> %s <comment>node_ref:</comment>%s, <comment>status:</comment>%s, ' .
+                        '<comment>etag:</comment>%s, <comment>title:</comment>%s',
+                        $i,
+                        $aggregate->getEtag() !== $expectedEtag ? 'SYNCED' : 'MATCHED',
+                        $nodeRef,
+                        $node->get(NodeV1Mixin::STATUS_FIELD),
+                        $node->get(NodeV1Mixin::ETAG_FIELD),
+                        $node->get(NodeV1Mixin::TITLE_FIELD)
+                    ));
+
                     ++$synced;
                 } catch (\Throwable $e) {
-                    $io->error(sprintf('%d. %s %s', $i, $nodeRef, $e->getMessage()));
+                    $io->text(sprintf('FAILED <comment>node_ref:</comment>%s', $nodeRef));
+                    $io->error($e->getMessage());
                     $io->newLine(2);
                 }
 
