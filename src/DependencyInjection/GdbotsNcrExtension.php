@@ -17,20 +17,13 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 final class GdbotsNcrExtension extends Extension
 {
-    /**
-     * @param array            $config
-     * @param ContainerBuilder $container
-     */
     public function load(array $config, ContainerBuilder $container)
     {
         $processor = new Processor();
-        $env = $container->hasParameter('app_env')
-            ? $container->getParameter('app_env')
-            : $container->getParameter('kernel.environment');
-        $configuration = new Configuration($env);
+        $configuration = new Configuration();
 
         $config = $processor->processConfiguration($configuration, $config);
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../../config'));
         $loader->load('ncr.xml');
         $loader->load('ncr_cache.xml');
         $loader->load('ncr_search.xml');
@@ -61,10 +54,6 @@ final class GdbotsNcrExtension extends Extension
         $container->setParameter('gdbots_ncr.node_idempotency_validator.ttl', $config['node_idempotency_validator']['ttl']);
     }
 
-    /**
-     * @param array            $config
-     * @param ContainerBuilder $container
-     */
     protected function configurePsr6Ncr(array $config, ContainerBuilder $container): void
     {
         $service = 'gdbots_ncr.ncr.psr6';
@@ -83,11 +72,6 @@ final class GdbotsNcrExtension extends Extension
         }
     }
 
-    /**
-     * @param array            $config
-     * @param ContainerBuilder $container
-     * @param string           $provider
-     */
     protected function configureDynamoDbNcr(array $config, ContainerBuilder $container, ?string $provider): void
     {
         $service = 'gdbots_ncr.ncr.dynamodb';
@@ -104,19 +88,14 @@ final class GdbotsNcrExtension extends Extension
         $container->setParameter("{$service}.table_manager.table_name_prefix", $dynamodb['table_manager']['table_name_prefix']);
         $container->setParameter("{$service}.table_manager.node_tables", $dynamodb['table_manager']['node_tables']);
         $container->setParameter("{$service}.config", [
-            'batch_size' => $dynamodb['config']['batch_size'],
-            'pool_size'  => $dynamodb['config']['pool_size'],
+            'batch_size'  => $dynamodb['config']['batch_size'],
+            'concurrency' => $dynamodb['config']['concurrency'],
         ]);
 
         $container->setAlias('ncr', $service);
         $container->setAlias(Ncr::class, 'ncr');
     }
 
-    /**
-     * @param array            $config
-     * @param ContainerBuilder $container
-     * @param string           $provider
-     */
     protected function configureElasticaNcrSearch(array $config, ContainerBuilder $container, ?string $provider): void
     {
         $service = 'gdbots_ncr.ncr_search.elastica';

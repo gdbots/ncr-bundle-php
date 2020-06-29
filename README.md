@@ -2,15 +2,12 @@ ncr-bundle-php
 =============
 
 [![Build Status](https://api.travis-ci.org/gdbots/ncr-bundle-php.svg)](https://travis-ci.org/gdbots/ncr-bundle-php)
-[![Code Climate](https://codeclimate.com/github/gdbots/ncr-bundle-php/badges/gpa.svg)](https://codeclimate.com/github/gdbots/ncr-bundle-php)
-[![Test Coverage](https://codeclimate.com/github/gdbots/ncr-bundle-php/badges/coverage.svg)](https://codeclimate.com/github/gdbots/ncr-bundle-php/coverage)
 
 Symfony bundle that integrates [gdbots/ncr](https://github.com/gdbots/ncr-php) library.
 
 
 # Configuration
-Follow the standard [bundle install](http://symfony.com/doc/current/bundles/installation.html)
-using __gdbots/ncr-bundle__ as the composer package name.
+Follow the standard [bundle install](http://symfony.com/doc/current/bundles/installation.html) using __gdbots/ncr-bundle__ as the composer package name.
 
 > The examples below assume you're running the DynamoDb Ncr and Elastica NcrSearch.
 
@@ -63,12 +60,12 @@ gdbots_ncr:
       config:
         # these apply to batch get operations
         batch_size: 100 # default
-        pool_size: 25 # default
+        concurrency: 25 # default
       table_manager:
         # multi-tenant applications will likely need to provide a custom
         # table manager so node tables can be derived at runtime.
         # class: Acme\Ncr\Repository\DynamoDb\TableManager
-        table_name_prefix: my-ncr # defaults to: "%kernel.environment%-ncr"
+        table_name_prefix: my-ncr
         node_tables:
           # any SchemaCurie not defined here will end up using the default
           # the entire default key is not needed unless you're changing it
@@ -94,7 +91,7 @@ gdbots_ncr:
       index_manager:
         # multi-tenant apps will probably need to use a custom class
         #class: Acme\Ncr\Search\Elastica\IndexManager
-        index_prefix: my-ncr # defaults to: "%kernel.environment%-ncr"
+        index_prefix: my-ncr
         indexes:
           default:
             number_of_shards: 5 # default
@@ -105,7 +102,6 @@ gdbots_ncr:
           # than the automatic handling would provide
           'acme:user':
             index_name: members # default is "default"
-            type_name: member # defaults to message of qname, i.e. "user" in this example
             mapper_class: Acme\Ncr\Search\Elastica\UserMapper
 
 # typically these would be in services.yml file.
@@ -119,7 +115,7 @@ services:
       - '%es_clusters%'
       - '@logger'
     tags:
-      - {name: monolog.logger, channel: ncr_search}
+      - {name: monolog.logger, channel: ncr}
 
   # recommended, create your own lazy loading handler
   # to optimize batch requests.
@@ -134,9 +130,7 @@ services:
 
 
 # Controllers
-It is recommended to have data retrieval be the responsibility of Pbjx requests, however, 
-that strategy doesn't work for all uses cases.  Use Symfony autowiring and typehint the 
-interface in your constructor or setter methods to get key Ncr services.
+It is recommended to have data retrieval be the responsibility of Pbjx requests, however, that strategy doesn't work for all uses cases.  Use Symfony autowiring and typehint the interface in your constructor or setter methods to get key Ncr services.
 
 Autowiring supported for these interfaces:
 
@@ -147,11 +141,9 @@ Autowiring supported for these interfaces:
 
 
 # Twig Extension
-The `NcrExtension` provides a function called `ncr_get_node`.  It is important to note 
-that this does __NOT__ make a query to get a node, instead it pulls from `NcrCache`.
+The `NcrExtension` provides a function called `ncr_get_node`.  It is important to note that this does __NOT__ make a query to get a node, instead it pulls from `NcrCache`.
 
-> This might change in the future, but this strategy eliminates horribly performing
-> twig templates that make Ncr queries.
+> This might change in the future, but this strategy eliminates horribly performing twig templates that make Ncr queries.
 
 The function will accept a `MessageRef`, `NodeRef` or a string version of a NodeRef.
 
@@ -168,6 +160,7 @@ __Other twig functions (documentation wip):__
 + ncr_deref_nodes
 + ncr_get_preloaded_nodes
 + ncr_get_preloaded_published_nodes
++ ncr_is_node_published
 + ncr_preload_node
 + ncr_preload_nodes
 + ncr_preload_embedded_nodes
@@ -175,17 +168,18 @@ __Other twig functions (documentation wip):__
 
 
 # Console Commands
-This library provides the basics for creating and extracting data from the Ncr services.
-Run the Symfony console and look for __ncr__ commands.
+This library provides the basics for creating and extracting data from the Ncr services. Run the Symfony console and look for __ncr__ commands.
 
 ```txt
-ncr:create-search-storage           Creates the NcrSearch storage.
-ncr:create-storage                  Creates the Ncr storage.
-ncr:describe-search-storage         Describes the NcrSearch storage.
-ncr:describe-storage                Describes the Ncr storage.
-ncr:export-nodes                    Pipes nodes from the Ncr to STDOUT.
-ncr:get-node                        Fetches a single node by its NodeRef and writes to STDOUT.
-ncr:reindex-nodes                   Pipes nodes from the Ncr and reindexes them.
+ncr:create-search    Creates the NcrSearch storage.
+ncr:create           Creates the Ncr storage.
+ncr:describe-search  Describes the NcrSearch storage.
+ncr:describe         Describes the Ncr storage.
+ncr:export-nodes     Pipes nodes from the Ncr to STDOUT.
+ncr:get-node         Fetches a single node by its NodeRef and writes to STDOUT.
+ncr:reindex-nodes    Pipes nodes from the Ncr and reindexes them.
+ncr:sync-node        Syncs a single node from the Ncr with the EventStore.
+ncr:sync-nodes       Syncs nodes from the Ncr with the EventStore.
 ```
 
 Review the `--help` on the ncr commands for more details.

@@ -8,16 +8,17 @@
 
     <service id="gdbots_ncr.ncr_search.elastica" class="%gdbots_ncr.ncr_search.elastica.class%">
       <argument type="service" id="gdbots_ncr.ncr_search.elastica.client_manager"/>
+      <argument type="service" id="gdbots_pbjx.event_dispatcher"/>
       <argument type="service" id="gdbots_ncr.ncr_search.elastica.index_manager"/>
       <argument type="service" id="logger" on-invalid="ignore"/>
       <argument>%gdbots_ncr.ncr_search.elastica.query_timeout%</argument>
-      <tag name="monolog.logger" channel="ncr_search"/>
+      <tag name="monolog.logger" channel="ncr"/>
     </service>
 
     <service id="gdbots_ncr.ncr_search.elastica.client_manager" class="Gdbots\Ncr\Search\Elastica\ClientManager">
       <argument>%gdbots_ncr.ncr_search.elastica.clusters%</argument>
       <argument type="service" id="logger" on-invalid="ignore"/>
-      <tag name="monolog.logger" channel="ncr_search"/>
+      <tag name="monolog.logger" channel="ncr"/>
     </service>
 
     <service id="gdbots_ncr.ncr_search.elastica.index_manager"

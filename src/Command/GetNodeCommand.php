@@ -4,38 +4,37 @@ declare(strict_types=1);
 namespace Gdbots\Bundle\NcrBundle\Command;
 
 use Gdbots\Ncr\Ncr;
-use Gdbots\Schemas\Ncr\NodeRef;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Gdbots\Pbj\WellKnown\NodeRef;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-final class GetNodeCommand extends ContainerAwareCommand
+final class GetNodeCommand extends Command
 {
-    use NcrCommandTrait;
+    protected static $defaultName = 'ncr:get-node';
+    protected ContainerInterface $container;
+    protected Ncr $ncr;
 
-    /**
-     * @param Ncr $ncr
-     */
-    public function __construct(Ncr $ncr)
+    public function __construct(ContainerInterface $container, Ncr $ncr)
     {
-        parent::__construct();
+        $this->container = $container;
         $this->ncr = $ncr;
+        parent::__construct();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function configure()
     {
+        $provider = $this->container->getParameter('gdbots_ncr.ncr.provider');
+
         $this
-            ->setName('ncr:get-node')
             ->setDescription('Fetches a single node by its NodeRef and writes to STDOUT.')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command will fetch a single node from the Ncr for the given 
-NodeRef provided and write the json value of the node to STDOUT.
+The <info>%command.name%</info> command will fetch a single node from the Ncr ({$provider})
+for the given NodeRef provided and write the json value of the node to STDOUT.
 
 <info>php %command.full_name% --tenant-id=client1 --consistent 'acme:article:123'</info>
 
@@ -72,13 +71,7 @@ EOF
             );
     }
 
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @return null
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $errOutput = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
         $output->setVerbosity(OutputInterface::VERBOSITY_QUIET);
@@ -100,5 +93,7 @@ EOF
         } catch (\Throwable $e) {
             $errOutput->writeln($e->getMessage());
         }
+
+        return self::SUCCESS;
     }
 }

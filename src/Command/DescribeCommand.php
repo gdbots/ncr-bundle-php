@@ -4,37 +4,39 @@ declare(strict_types=1);
 namespace Gdbots\Bundle\NcrBundle\Command;
 
 use Gdbots\Ncr\Ncr;
+use Gdbots\Pbj\MessageResolver;
+use Gdbots\Pbj\SchemaCurie;
+use Gdbots\Pbj\SchemaQName;
 use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-final class DescribeStorageCommand extends ContainerAwareCommand
+final class DescribeCommand extends Command
 {
-    use NcrCommandTrait;
+    protected static $defaultName = 'ncr:describe';
+    protected ContainerInterface $container;
+    protected Ncr $ncr;
 
-    /**
-     * @param Ncr $ncr
-     */
-    public function __construct(Ncr $ncr)
+    public function __construct(ContainerInterface $container, Ncr $ncr)
     {
-        parent::__construct();
+        $this->container = $container;
         $this->ncr = $ncr;
+        parent::__construct();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function configure()
     {
+        $provider = $this->container->getParameter('gdbots_ncr.ncr.provider');
+
         $this
-            ->setName('ncr:describe-storage')
-            ->setDescription('Describes the Ncr storage.')
+            ->setDescription("Describes the Ncr ({$provider}) storage")
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command will describe the storage for the Ncr.  
+The <info>%command.name%</info> command will describe the storage for the Ncr ({$provider}).
 If a SchemaQName is not provided it will run on all schemas having the mixin "gdbots:ncr:mixin:node".
 
 <info>php %command.full_name% --tenant-id=client1 'acme:article'</info>
@@ -45,7 +47,7 @@ EOF
                 'context',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Context to provide to the NcrSearch (json).'
+                'Context to provide to the Ncr (json).'
             )
             ->addOption(
                 'tenant-id',
@@ -60,15 +62,7 @@ EOF
             );
     }
 
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @return null
-     *
-     * @throws \Throwable
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $context = $input->getOption('context') ?: '{}';
         if (strpos($context, '{') === false) {
@@ -79,10 +73,16 @@ EOF
 
         $io = new SymfonyStyle($input, $output);
         $io->title('Ncr Storage Describer');
+        $io->comment('context: ' . json_encode($context));
 
-        foreach ($this->getSchemasUsingMixin(NodeV1Mixin::create(), $input->getArgument('qname')) as $schema) {
-            $qname = $schema->getQName();
+        $qnames = $input->getArgument('qname')
+            ? [SchemaQName::fromString($input->getArgument('qname'))]
+            : array_map(
+                fn(string $curie) => SchemaCurie::fromString($curie)->getQName(),
+                MessageResolver::findAllUsingMixin(NodeV1Mixin::SCHEMA_CURIE_MAJOR, false)
+            );
 
+        foreach ($qnames as $qname) {
             try {
                 $details = $this->ncr->describeStorage($qname, $context);
                 $io->success(sprintf('Describing Ncr storage for "%s".', $qname));
@@ -100,5 +100,7 @@ EOF
                 $io->newLine();
             }
         }
+
+        return self::SUCCESS;
     }
 }

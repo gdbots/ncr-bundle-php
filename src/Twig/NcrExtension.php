@@ -3,16 +3,15 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Twig;
 
-use Gdbots\Common\Util\ClassUtils;
 use Gdbots\Ncr\Exception\NodeNotFound;
 use Gdbots\Ncr\NcrCache;
 use Gdbots\Ncr\NcrPreloader;
 use Gdbots\Pbj\Message;
-use Gdbots\Pbj\MessageRef;
-use Gdbots\Pbj\WellKnown\Identifier;
+use Gdbots\Pbj\Util\ClassUtil;
+use Gdbots\Pbj\WellKnown\MessageRef;
+use Gdbots\Pbj\WellKnown\NodeRef;
 use Gdbots\Schemas\Ncr\Enum\NodeStatus;
-use Gdbots\Schemas\Ncr\Mixin\Node\Node;
-use Gdbots\Schemas\Ncr\NodeRef;
+use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Twig\Extension\AbstractExtension;
@@ -20,24 +19,11 @@ use Twig\TwigFunction;
 
 final class NcrExtension extends AbstractExtension
 {
-    /** @var NcrCache */
-    private $ncrCache;
+    private NcrCache $ncrCache;
+    private NcrPreloader $ncrPreloader;
+    private LoggerInterface $logger;
+    private bool $debug;
 
-    /** @var NcrPreloader */
-    private $ncrPreloader;
-
-    /** @var LoggerInterface */
-    private $logger;
-
-    /** @var bool */
-    private $debug = false;
-
-    /**
-     * @param NcrCache        $ncrCache
-     * @param NcrPreloader    $ncrPreloader
-     * @param LoggerInterface $logger
-     * @param bool            $debug
-     */
     public function __construct(
         NcrCache $ncrCache,
         NcrPreloader $ncrPreloader,
@@ -50,9 +36,6 @@ final class NcrExtension extends AbstractExtension
         $this->debug = $debug;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getFunctions()
     {
         return [
@@ -69,25 +52,17 @@ final class NcrExtension extends AbstractExtension
     }
 
     /**
-     * @return string
-     */
-    public function getName()
-    {
-        return 'gdbots_ncr_extension';
-    }
-
-    /**
-     * @see NcrCache::derefNodes
-     *
-     * @param Node   $node
-     * @param array  $fields
-     * @param string $return
+     * @param Message $node
+     * @param array   $fields
+     * @param string  $return
      *
      * @return array
+     *
+     * @see NcrCache::derefNodes
      */
     public function derefNodes($node, array $fields = [], ?string $return = null): array
     {
-        if (!$node instanceof Node) {
+        if (!$node instanceof Message) {
             return [];
         }
 
@@ -101,11 +76,11 @@ final class NcrExtension extends AbstractExtension
      *
      * @param NodeRef|MessageRef|string $ref
      *
-     * @return Node
+     * @return Message
      *
      * @throws \Throwable
      */
-    public function getNode($ref): ?Node
+    public function getNode($ref): ?Message
     {
         $nodeRef = $this->toNodeRef($ref);
         if (!$nodeRef instanceof NodeRef) {
@@ -124,7 +99,7 @@ final class NcrExtension extends AbstractExtension
             $this->logger->error(
                 sprintf(
                     '%s::Unable to process twig "ncr_get_node" function for [{node_ref}].',
-                    ClassUtils::getShortName($e)
+                    ClassUtil::getShortName($e)
                 ),
                 ['exception' => $e, 'node_ref' => (string)$nodeRef]
             );
@@ -133,25 +108,20 @@ final class NcrExtension extends AbstractExtension
         return null;
     }
 
-    /**
-     * @param Node $node
-     *
-     * @return bool
-     */
     public function isNodePublished($node): bool
     {
-        if (!$node instanceof Node) {
+        if (!$node instanceof Message) {
             return false;
         }
 
-        return NodeStatus::PUBLISHED()->equals($node->get('status'));
+        return NodeStatus::PUBLISHED === $node->fget(NodeV1Mixin::STATUS_FIELD);
     }
 
     /**
      * @param bool   $andClear
      * @param string $namespace
      *
-     * @return Node[]
+     * @return Message[]
      */
     public function getPreloadedNodes(bool $andClear = true, string $namespace = NcrPreloader::DEFAULT_NAMESPACE): array
     {
@@ -167,7 +137,7 @@ final class NcrExtension extends AbstractExtension
      * @param bool   $andClear
      * @param string $namespace
      *
-     * @return Node[]
+     * @return Message[]
      */
     public function getPreloadedPublishedNodes(bool $andClear = true, string $namespace = NcrPreloader::DEFAULT_NAMESPACE): array
     {
@@ -207,11 +177,12 @@ final class NcrExtension extends AbstractExtension
     }
 
     /**
-     * @see NcrPreloader::addEmbeddedNodeRefs
-     *
      * @param Message[] $messages Array of messages to extract NodeRefs from.
      * @param array     $paths    An associative array of ['field_name' => 'qname'], i.e. ['user_id', 'acme:user']
      * @param string    $namespace
+     *
+     * @see NcrPreloader::addEmbeddedNodeRefs
+     *
      */
     public function preloadEmbeddedNodes(
         array $messages,
@@ -221,23 +192,16 @@ final class NcrExtension extends AbstractExtension
         $this->ncrPreloader->addEmbeddedNodeRefs($messages, $paths, $namespace);
     }
 
-    /**
-     * @param mixed $val
-     *
-     * @return NodeRef
-     */
     public function toNodeRef($val): ?NodeRef
     {
         if ($val instanceof NodeRef) {
             return $val;
         } else if (empty($val)) {
             return null;
+        } else if ($val instanceof Message) {
+            return $val->generateNodeRef();
         } else if ($val instanceof MessageRef) {
             return NodeRef::fromMessageRef($val);
-        } else if ($val instanceof Node) {
-            return NodeRef::fromNode($val);
-        } else if ($val instanceof Identifier && method_exists($val, 'toNodeRef')) {
-            return $val->toNodeRef();
         }
 
         try {

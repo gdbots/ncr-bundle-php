@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Gdbots\Bundle\NcrBundle\DependencyInjection;
 
 use Gdbots\Ncr\Repository\DynamoDb\DynamoDbNcr;
+use Gdbots\Ncr\Repository\DynamoDb\NodeTable;
 use Gdbots\Ncr\Repository\DynamoDb\TableManager;
 use Gdbots\Ncr\Repository\Psr6Ncr;
 use Gdbots\Ncr\Search\Elastica\ElasticaNcrSearch;
@@ -15,23 +16,10 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 final class Configuration implements ConfigurationInterface
 {
-    private $env;
-
-    /**
-     * @param string $env
-     */
-    public function __construct(string $env = 'dev')
+    public function getConfigTreeBuilder(): TreeBuilder
     {
-        $this->env = $env;
-    }
-
-    /**
-     * @return TreeBuilder
-     */
-    public function getConfigTreeBuilder()
-    {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('gdbots_ncr');
+        $treeBuilder = new TreeBuilder('gdbots_ncr');
+        $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
             ->children()
@@ -113,13 +101,10 @@ final class Configuration implements ConfigurationInterface
         return $treeBuilder;
     }
 
-    /**
-     * @return NodeDefinition
-     */
     protected function getDynamoDbNcrConfigTree(): NodeDefinition
     {
-        $treeBuilder = new TreeBuilder();
-        $node = $treeBuilder->root('dynamodb');
+        $treeBuilder = new TreeBuilder('dynamodb');
+        $node = $treeBuilder->getRootNode();
 
         $node
             ->addDefaultsIfNotSet()
@@ -134,7 +119,7 @@ final class Configuration implements ConfigurationInterface
                             ->defaultValue(TableManager::class)
                         ->end()
                         ->scalarNode('table_name_prefix')
-                            ->defaultValue("{$this->env}-ncr")
+                            ->defaultValue('%env(default:app_env:CLOUD_ENV)%-ncr')
                         ->end()
                         ->arrayNode('node_tables')
                             ->useAttributeAsKey('name')
@@ -158,7 +143,7 @@ final class Configuration implements ConfigurationInterface
                         ->integerNode('batch_size')
                             ->defaultValue(100)
                         ->end()
-                        ->integerNode('pool_size')
+                        ->integerNode('concurrency')
                             ->defaultValue(25)
                         ->end()
                     ->end()
@@ -169,13 +154,10 @@ final class Configuration implements ConfigurationInterface
         return $node;
     }
 
-    /**
-     * @return NodeDefinition
-     */
     protected function getElasticaNcrSearchConfigTree(): NodeDefinition
     {
-        $treeBuilder = new TreeBuilder();
-        $node = $treeBuilder->root('elastica');
+        $treeBuilder = new TreeBuilder('elastica');
+        $node = $treeBuilder->getRootNode();
 
         $defaultServers = [['host' => '127.0.0.1', 'port' => 9200]];
         $defaultCluster = [
@@ -184,10 +166,8 @@ final class Configuration implements ConfigurationInterface
                 'timeout'     => 300,
                 'debug'       => false,
                 'persistent'  => true,
+                'ssl'         => true,
                 'servers'     => $defaultServers,
-                'config'      => [
-                    'ssl' => true,
-                ]
             ],
         ];
 
@@ -205,7 +185,7 @@ final class Configuration implements ConfigurationInterface
                             ->defaultValue(IndexManager::class)
                         ->end()
                         ->scalarNode('index_prefix')
-                            ->defaultValue("{$this->env}-ncr")
+                            ->defaultValue('%env(default:app_vendor:APP_VENDOR)%-%env(default:app_env:CLOUD_ENV)%-ncr')
                         ->end()
                         ->arrayNode('indexes')
                             ->useAttributeAsKey('name')
@@ -238,7 +218,6 @@ final class Configuration implements ConfigurationInterface
                                         ->defaultValue(NodeMapper::class)
                                     ->end()
                                     ->scalarNode('index_name')->end()
-                                    ->scalarNode('type_name')->end()
                                 ->end()
                             ->end()
                         ->end()
@@ -278,6 +257,10 @@ final class Configuration implements ConfigurationInterface
                                 ->defaultTrue()
                                 ->treatNullLike(true)
                             ->end()
+                            ->booleanNode('ssl')
+                                ->defaultTrue()
+                                ->treatNullLike(true)
+                            ->end()
                             ->arrayNode('servers')
                                 ->requiresAtLeastOneElement()
                                 ->treatNullLike($defaultServers)
@@ -294,15 +277,6 @@ final class Configuration implements ConfigurationInterface
                                             ->defaultValue(9200)
                                             ->treatNullLike(9200)
                                         ->end()
-                                    ->end()
-                                ->end()
-                            ->end()
-                            ->arrayNode('config')
-                                ->addDefaultsIfNotSet()
-                                ->children()
-                                    ->booleanNode('ssl')
-                                        ->defaultTrue()
-                                        ->treatNullLike(true)
                                     ->end()
                                 ->end()
                             ->end()

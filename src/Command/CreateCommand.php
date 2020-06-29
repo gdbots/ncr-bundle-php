@@ -3,39 +3,41 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
-use Gdbots\Ncr\NcrSearch;
-use Gdbots\Schemas\Ncr\Mixin\Indexed\IndexedV1Mixin;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Gdbots\Ncr\Ncr;
+use Gdbots\Pbj\MessageResolver;
+use Gdbots\Pbj\SchemaCurie;
+use Gdbots\Pbj\SchemaQName;
+use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-final class CreateSearchStorageCommand extends ContainerAwareCommand
+final class CreateCommand extends Command
 {
-    use NcrCommandTrait;
+    protected static $defaultName = 'ncr:create';
+    protected ContainerInterface $container;
+    protected Ncr $ncr;
 
-    /**
-     * @param NcrSearch $ncrSearch
-     */
-    public function __construct(NcrSearch $ncrSearch)
+    public function __construct(ContainerInterface $container, Ncr $ncr)
     {
+        $this->container = $container;
+        $this->ncr = $ncr;
         parent::__construct();
-        $this->ncrSearch = $ncrSearch;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function configure()
     {
+        $provider = $this->container->getParameter('gdbots_ncr.ncr.provider');
+
         $this
-            ->setName('ncr:create-search-storage')
-            ->setDescription('Creates the NcrSearch storage.')
+            ->setDescription("Creates the Ncr ({$provider}) storage")
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command will create the storage for the NcrSearch.  
-If a SchemaQName is not provided it will run on all schemas having the mixin "gdbots:ncr:mixin:indexed".
+The <info>%command.name%</info> command will create the storage for the Ncr ({$provider}).
+If a SchemaQName is not provided it will run on all schemas having the mixin "gdbots:ncr:mixin:node".
 
 <info>php %command.full_name% --tenant-id=client1 'acme:article'</info>
 
@@ -51,7 +53,7 @@ EOF
                 'context',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Context to provide to the NcrSearch (json).'
+                'Context to provide to the Ncr (json).'
             )
             ->addOption(
                 'tenant-id',
@@ -66,15 +68,7 @@ EOF
             );
     }
 
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @return null
-     *
-     * @throws \Throwable
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $skipErrors = $input->getOption('skip-errors');
         $context = $input->getOption('context') ?: '{}';
@@ -83,22 +77,29 @@ EOF
         }
         $context = json_decode($context, true);
         $context['tenant_id'] = (string)$input->getOption('tenant-id');
+        $context['skip_errors'] = $skipErrors;
 
         $io = new SymfonyStyle($input, $output);
-        $io->title('NcrSearch Storage Creator');
+        $io->title('Ncr Storage Creator');
+        $io->comment('context: ' . json_encode($context));
 
-        foreach ($this->getSchemasUsingMixin(IndexedV1Mixin::create(), $input->getArgument('qname')) as $schema) {
-            $qname = $schema->getQName();
+        $qnames = $input->getArgument('qname')
+            ? [SchemaQName::fromString($input->getArgument('qname'))]
+            : array_map(
+                fn(string $curie) => SchemaCurie::fromString($curie)->getQName(),
+                MessageResolver::findAllUsingMixin(NodeV1Mixin::SCHEMA_CURIE_MAJOR, false)
+            );
 
+        foreach ($qnames as $qname) {
             try {
-                $this->ncrSearch->createStorage($qname, $context);
-                $io->success(sprintf('Created NcrSearch storage for "%s".', $qname));
+                $this->ncr->createStorage($qname, $context);
+                $io->success(sprintf('Created Ncr storage for "%s".', $qname));
             } catch (\Throwable $e) {
                 if (!$skipErrors) {
                     throw $e;
                 }
 
-                $io->error(sprintf('Failed to create NcrSearch storage for "%s".', $qname));
+                $io->error(sprintf('Failed to create Ncr storage for "%s".', $qname));
                 $io->text($e->getMessage());
                 if ($e->getPrevious()) {
                     $io->newLine();
@@ -108,5 +109,7 @@ EOF
                 $io->newLine();
             }
         }
+
+        return self::SUCCESS;
     }
 }
