@@ -7,8 +7,7 @@ Symfony bundle that integrates [gdbots/ncr](https://github.com/gdbots/ncr-php) l
 
 
 # Configuration
-Follow the standard [bundle install](http://symfony.com/doc/current/bundles/installation.html)
-using __gdbots/ncr-bundle__ as the composer package name.
+Follow the standard [bundle install](http://symfony.com/doc/current/bundles/installation.html) using __gdbots/ncr-bundle__ as the composer package name.
 
 > The examples below assume you're running the DynamoDb Ncr and Elastica NcrSearch.
 
@@ -131,9 +130,7 @@ services:
 
 
 # Controllers
-It is recommended to have data retrieval be the responsibility of Pbjx requests, however,
-that strategy doesn't work for all uses cases.  Use Symfony autowiring and typehint the
-interface in your constructor or setter methods to get key Ncr services.
+It is recommended to have data retrieval be the responsibility of Pbjx requests, however, that strategy doesn't work for all uses cases.  Use Symfony autowiring and typehint the interface in your constructor or setter methods to get key Ncr services.
 
 Autowiring supported for these interfaces:
 
@@ -144,11 +141,9 @@ Autowiring supported for these interfaces:
 
 
 # Twig Extension
-The `NcrExtension` provides a function called `ncr_get_node`.  It is important to note
-that this does __NOT__ make a query to get a node, instead it pulls from `NcrCache`.
+The `NcrExtension` provides a function called `ncr_get_node`.  It is important to note that this does __NOT__ make a query to get a node, instead it pulls from `NcrCache`.
 
-> This might change in the future, but this strategy eliminates horribly performing
-> twig templates that make Ncr queries.
+> This might change in the future, but this strategy eliminates horribly performing twig templates that make Ncr queries.
 
 The function will accept a `MessageRef`, `NodeRef` or a string version of a NodeRef.
 
@@ -165,6 +160,7 @@ __Other twig functions (documentation wip):__
 + ncr_deref_nodes
 + ncr_get_preloaded_nodes
 + ncr_get_preloaded_published_nodes
++ ncr_is_node_published
 + ncr_preload_node
 + ncr_preload_nodes
 + ncr_preload_embedded_nodes
@@ -172,8 +168,7 @@ __Other twig functions (documentation wip):__
 
 
 # Console Commands
-This library provides the basics for creating and extracting data from the Ncr services.
-Run the Symfony console and look for __ncr__ commands.
+This library provides the basics for creating and extracting data from the Ncr services. Run the Symfony console and look for __ncr__ commands.
 
 ```txt
 ncr:create-search    Creates the NcrSearch storage.
@@ -183,6 +178,8 @@ ncr:describe         Describes the Ncr storage.
 ncr:export-nodes     Pipes nodes from the Ncr to STDOUT.
 ncr:get-node         Fetches a single node by its NodeRef and writes to STDOUT.
 ncr:reindex-nodes    Pipes nodes from the Ncr and reindexes them.
+ncr:sync-node        Syncs a single node from the Ncr with the EventStore.
+ncr:sync-nodes       Syncs nodes from the Ncr with the EventStore.
 ```
 
 Review the `--help` on the ncr commands for more details.
