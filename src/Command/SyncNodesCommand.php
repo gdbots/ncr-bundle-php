@@ -150,7 +150,7 @@ EOF
 
                     ++$synced;
                 } catch (\Throwable $e) {
-                    $io->text(sprintf('FAILED <comment>node_ref:</comment>%s', $nodeRef));
+                    $io->text(sprintf('<info>%d.</info> FAILED <comment>node_ref:</comment>%s', $i, $nodeRef));
                     $io->error($e->getMessage());
                     $io->newLine(2);
                 }
