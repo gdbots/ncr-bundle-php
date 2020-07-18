@@ -9,7 +9,6 @@ use Gdbots\Ncr\Ncr;
 use Gdbots\Ncr\NcrSearch;
 use Gdbots\Pbj\WellKnown\NodeRef;
 use Gdbots\Pbjx\Pbjx;
-use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -100,7 +99,7 @@ EOF
                 $expectedEtag = null;
             } else {
                 $node = $this->ncr->getNode($nodeRef, true, $context);
-                $expectedEtag = $node->get(NodeV1Mixin::ETAG_FIELD);
+                $expectedEtag = $node->get('etag');
                 $aggregate = AggregateResolver::resolve($nodeRef->getQName())::fromNode($node, $this->pbjx);
             }
         } catch (NodeNotFound $nf) {

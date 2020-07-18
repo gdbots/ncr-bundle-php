@@ -12,7 +12,6 @@ use Gdbots\Pbj\SchemaCurie;
 use Gdbots\Pbj\SchemaQName;
 use Gdbots\Pbj\Util\NumberUtil;
 use Gdbots\Pbjx\Pbjx;
-use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -117,7 +116,7 @@ EOF
             ? [$qname]
             : array_map(
                 fn(string $curie) => SchemaCurie::fromString($curie)->getQName(),
-                MessageResolver::findAllUsingMixin(NodeV1Mixin::SCHEMA_CURIE_MAJOR, false)
+                MessageResolver::findAllUsingMixin('gdbots:ncr:mixin:node:v1', false)
             );
 
         foreach ($qnames as $qname) {
@@ -127,7 +126,7 @@ EOF
                 $nodeRef = $node->generateNodeRef();
 
                 try {
-                    $expectedEtag = $node->get(NodeV1Mixin::ETAG_FIELD);
+                    $expectedEtag = $node->get('etag');
                     $aggregate = AggregateResolver::resolve($nodeRef->getQName())::fromNode($node, $this->pbjx);
                     $aggregate->sync($context);
 
@@ -143,9 +142,9 @@ EOF
                         $i,
                         $aggregate->getEtag() !== $expectedEtag ? 'SYNCED' : 'MATCHED',
                         $nodeRef,
-                        $node->get(NodeV1Mixin::STATUS_FIELD),
-                        $node->get(NodeV1Mixin::ETAG_FIELD),
-                        $node->get(NodeV1Mixin::TITLE_FIELD)
+                        $node->get('status'),
+                        $node->get('etag'),
+                        $node->get('title')
                     ));
 
                     ++$synced;

@@ -11,7 +11,6 @@ use Gdbots\Pbj\Util\ClassUtil;
 use Gdbots\Pbj\WellKnown\MessageRef;
 use Gdbots\Pbj\WellKnown\NodeRef;
 use Gdbots\Schemas\Ncr\Enum\NodeStatus;
-use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Twig\Extension\AbstractExtension;
@@ -114,7 +113,7 @@ final class NcrExtension extends AbstractExtension
             return false;
         }
 
-        return NodeStatus::PUBLISHED === $node->fget(NodeV1Mixin::STATUS_FIELD);
+        return NodeStatus::PUBLISHED === $node->fget('status');
     }
 
     /**

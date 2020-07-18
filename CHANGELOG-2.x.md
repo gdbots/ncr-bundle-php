@@ -2,6 +2,11 @@
 This changelog references the relevant changes done in 2.x versions.
 
 
+## v2.1.0
+* Uses `"gdbots/ncr": "^2.1"`
+* Uses `"gdbots/pbjx-bundle": "^2.1"`
+
+
 ## v2.0.0
 __BREAKING CHANGES__
 

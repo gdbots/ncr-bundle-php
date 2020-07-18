@@ -7,7 +7,6 @@ use Gdbots\Ncr\NcrSearch;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\SchemaCurie;
 use Gdbots\Pbj\SchemaQName;
-use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,9 +15,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-final class CreateSearchCommand extends Command
+final class DescribeSearchStorageCommand extends Command
 {
-    protected static $defaultName = 'ncr:create-search';
+    protected static $defaultName = 'ncr:describe-search-storage';
     protected ContainerInterface $container;
     protected NcrSearch $ncrSearch;
 
@@ -34,20 +33,14 @@ final class CreateSearchCommand extends Command
         $provider = $this->container->getParameter('gdbots_ncr.ncr_search.provider');
 
         $this
-            ->setDescription("Creates the NcrSearch ({$provider}) storage")
+            ->setDescription("Describes the NcrSearch ({$provider}) storage")
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command will create the storage for the NcrSearch ({$provider}).
+The <info>%command.name%</info> command will describe the storage for the NcrSearch ({$provider}).
 If a SchemaQName is not provided it will run on all schemas having the mixin "gdbots:ncr:mixin:node".
 
 <info>php %command.full_name% --tenant-id=client1 'acme:article'</info>
 
 EOF
-            )
-            ->addOption(
-                'skip-errors',
-                null,
-                InputOption::VALUE_NONE,
-                'Skip any schemas that fail to create.'
             )
             ->addOption(
                 'context',
@@ -70,36 +63,33 @@ EOF
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $skipErrors = $input->getOption('skip-errors');
         $context = $input->getOption('context') ?: '{}';
         if (strpos($context, '{') === false) {
             $context = base64_decode($context);
         }
         $context = json_decode($context, true);
         $context['tenant_id'] = (string)$input->getOption('tenant-id');
-        $context['skip_errors'] = $skipErrors;
 
         $io = new SymfonyStyle($input, $output);
-        $io->title('NcrSearch Storage Creator');
+        $io->title('NcrSearch Storage Describer');
         $io->comment('context: ' . json_encode($context));
 
         $qnames = $input->getArgument('qname')
             ? [SchemaQName::fromString($input->getArgument('qname'))]
             : array_map(
                 fn(string $curie) => SchemaCurie::fromString($curie)->getQName(),
-                MessageResolver::findAllUsingMixin(NodeV1Mixin::SCHEMA_CURIE_MAJOR, false)
+                MessageResolver::findAllUsingMixin('gdbots:ncr:mixin:node:v1', false)
             );
 
         foreach ($qnames as $qname) {
             try {
-                $this->ncrSearch->createStorage($qname, $context);
-                $io->success(sprintf('Created NcrSearch storage for "%s".', $qname));
+                $details = $this->ncrSearch->describeStorage($qname, $context);
+                $io->success(sprintf('Describing NcrSearch storage for "%s".', $qname));
+                $io->comment(sprintf('context: %s', json_encode($context)));
+                $io->text($details);
+                $io->newLine();
             } catch (\Throwable $e) {
-                if (!$skipErrors) {
-                    throw $e;
-                }
-
-                $io->error(sprintf('Failed to create NcrSearch storage for "%s".', $qname));
+                $io->error(sprintf('Failed to describe NcrSearch storage for "%s".', $qname));
                 $io->text($e->getMessage());
                 if ($e->getPrevious()) {
                     $io->newLine();

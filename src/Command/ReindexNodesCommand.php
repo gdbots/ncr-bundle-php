@@ -10,7 +10,6 @@ use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\SchemaCurie;
 use Gdbots\Pbj\SchemaQName;
 use Gdbots\Pbj\Util\NumberUtil;
-use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -126,7 +125,7 @@ EOF
             ? [$qname]
             : array_map(
                 fn(string $curie) => SchemaCurie::fromString($curie)->getQName(),
-                MessageResolver::findAllUsingMixin(NodeV1Mixin::SCHEMA_CURIE_MAJOR, false)
+                MessageResolver::findAllUsingMixin('gdbots:ncr:mixin:node:v1', false)
             );
 
         foreach ($qnames as $q) {
@@ -140,9 +139,9 @@ EOF
                     '<comment>etag:</comment>%s, <comment>title:</comment>%s',
                     $i,
                     $node->generateNodeRef(),
-                    $node->get(NodeV1Mixin::STATUS_FIELD),
-                    $node->get(NodeV1Mixin::ETAG_FIELD),
-                    $node->get(NodeV1Mixin::TITLE_FIELD)
+                    $node->get('status'),
+                    $node->get('etag'),
+                    $node->get('title')
                 ));
 
                 if (count($queue) >= $batchSize) {

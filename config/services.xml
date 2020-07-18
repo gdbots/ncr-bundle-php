@@ -89,6 +89,14 @@
       <tag name="pbjx.handler"/>
     </service>
 
+    <service id="gdbots_ncr.update_node_labels_handler" class="Gdbots\Ncr\UpdateNodeLabelsHandler">
+      <tag name="pbjx.handler"/>
+    </service>
+
+    <service id="gdbots_ncr.update_node_tags_handler" class="Gdbots\Ncr\UpdateNodeTagsHandler">
+      <tag name="pbjx.handler"/>
+    </service>
+
     <!-- request handlers -->
     <service id="gdbots_ncr.get_node_batch_request_handler" class="Gdbots\Ncr\GetNodeBatchRequestHandler">
       <argument type="service" id="ncr"/>

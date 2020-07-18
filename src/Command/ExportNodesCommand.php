@@ -8,7 +8,6 @@ use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\SchemaCurie;
 use Gdbots\Pbj\SchemaQName;
 use Gdbots\Pbj\Util\NumberUtil;
-use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -100,7 +99,7 @@ EOF
             ? [$qname]
             : array_map(
                 fn(string $curie) => SchemaCurie::fromString($curie)->getQName(),
-                MessageResolver::findAllUsingMixin(NodeV1Mixin::SCHEMA_CURIE_MAJOR, false)
+                MessageResolver::findAllUsingMixin('gdbots:ncr:mixin:node:v1', false)
             );
 
         $i = 0;

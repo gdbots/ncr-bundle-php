@@ -171,15 +171,15 @@ __Other twig functions (documentation wip):__
 This library provides the basics for creating and extracting data from the Ncr services. Run the Symfony console and look for __ncr__ commands.
 
 ```txt
-ncr:create-search    Creates the NcrSearch storage.
-ncr:create           Creates the Ncr storage.
-ncr:describe-search  Describes the NcrSearch storage.
-ncr:describe         Describes the Ncr storage.
-ncr:export-nodes     Pipes nodes from the Ncr to STDOUT.
-ncr:get-node         Fetches a single node by its NodeRef and writes to STDOUT.
-ncr:reindex-nodes    Pipes nodes from the Ncr and reindexes them.
-ncr:sync-node        Syncs a single node from the Ncr with the EventStore.
-ncr:sync-nodes       Syncs nodes from the Ncr with the EventStore.
+ncr:create-search-storage    Creates the NcrSearch storage.
+ncr:create-storage           Creates the Ncr storage.
+ncr:describe-search-storage  Describes the NcrSearch storage.
+ncr:describe-storage         Describes the Ncr storage.
+ncr:export-nodes             Pipes nodes from the Ncr to STDOUT.
+ncr:get-node                 Fetches a single node by its NodeRef and writes to STDOUT.
+ncr:reindex-nodes            Pipes nodes from the Ncr and reindexes them.
+ncr:sync-node                Syncs a single node from the Ncr with the EventStore.
+ncr:sync-nodes               Syncs nodes from the Ncr with the EventStore.
 ```
 
 Review the `--help` on the ncr commands for more details.

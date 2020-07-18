@@ -3,11 +3,10 @@ declare(strict_types=1);
 
 namespace Gdbots\Bundle\NcrBundle\Command;
 
-use Gdbots\Ncr\NcrSearch;
+use Gdbots\Ncr\Ncr;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\SchemaCurie;
 use Gdbots\Pbj\SchemaQName;
-use Gdbots\Schemas\Ncr\Mixin\Node\NodeV1Mixin;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,27 +15,27 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-final class DescribeSearchCommand extends Command
+final class DescribeStorageCommand extends Command
 {
-    protected static $defaultName = 'ncr:describe-search';
+    protected static $defaultName = 'ncr:describe-storage';
     protected ContainerInterface $container;
-    protected NcrSearch $ncrSearch;
+    protected Ncr $ncr;
 
-    public function __construct(ContainerInterface $container, NcrSearch $ncrSearch)
+    public function __construct(ContainerInterface $container, Ncr $ncr)
     {
         $this->container = $container;
-        $this->ncrSearch = $ncrSearch;
+        $this->ncr = $ncr;
         parent::__construct();
     }
 
     protected function configure()
     {
-        $provider = $this->container->getParameter('gdbots_ncr.ncr_search.provider');
+        $provider = $this->container->getParameter('gdbots_ncr.ncr.provider');
 
         $this
-            ->setDescription("Describes the NcrSearch ({$provider}) storage")
+            ->setDescription("Describes the Ncr ({$provider}) storage")
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command will describe the storage for the NcrSearch ({$provider}).
+The <info>%command.name%</info> command will describe the storage for the Ncr ({$provider}).
 If a SchemaQName is not provided it will run on all schemas having the mixin "gdbots:ncr:mixin:node".
 
 <info>php %command.full_name% --tenant-id=client1 'acme:article'</info>
@@ -47,7 +46,7 @@ EOF
                 'context',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Context to provide to the NcrSearch (json).'
+                'Context to provide to the Ncr (json).'
             )
             ->addOption(
                 'tenant-id',
@@ -72,25 +71,25 @@ EOF
         $context['tenant_id'] = (string)$input->getOption('tenant-id');
 
         $io = new SymfonyStyle($input, $output);
-        $io->title('NcrSearch Storage Describer');
+        $io->title('Ncr Storage Describer');
         $io->comment('context: ' . json_encode($context));
 
         $qnames = $input->getArgument('qname')
             ? [SchemaQName::fromString($input->getArgument('qname'))]
             : array_map(
                 fn(string $curie) => SchemaCurie::fromString($curie)->getQName(),
-                MessageResolver::findAllUsingMixin(NodeV1Mixin::SCHEMA_CURIE_MAJOR, false)
+                MessageResolver::findAllUsingMixin('gdbots:ncr:mixin:node:v1', false)
             );
 
         foreach ($qnames as $qname) {
             try {
-                $details = $this->ncrSearch->describeStorage($qname, $context);
-                $io->success(sprintf('Describing NcrSearch storage for "%s".', $qname));
+                $details = $this->ncr->describeStorage($qname, $context);
+                $io->success(sprintf('Describing Ncr storage for "%s".', $qname));
                 $io->comment(sprintf('context: %s', json_encode($context)));
                 $io->text($details);
                 $io->newLine();
             } catch (\Throwable $e) {
-                $io->error(sprintf('Failed to describe NcrSearch storage for "%s".', $qname));
+                $io->error(sprintf('Failed to describe Ncr storage for "%s".', $qname));
                 $io->text($e->getMessage());
                 if ($e->getPrevious()) {
                     $io->newLine();

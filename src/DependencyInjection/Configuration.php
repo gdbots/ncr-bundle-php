@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Gdbots\Bundle\NcrBundle\DependencyInjection;
 
 use Gdbots\Ncr\Repository\DynamoDb\DynamoDbNcr;
-use Gdbots\Ncr\Repository\DynamoDb\NodeTable;
 use Gdbots\Ncr\Repository\DynamoDb\TableManager;
 use Gdbots\Ncr\Repository\Psr6Ncr;
 use Gdbots\Ncr\Search\Elastica\ElasticaNcrSearch;
