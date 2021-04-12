@@ -90,10 +90,12 @@
     </service>
 
     <service id="gdbots_ncr.update_node_labels_handler" class="Gdbots\Ncr\UpdateNodeLabelsHandler">
+      <argument type="service" id="ncr"/>
       <tag name="pbjx.handler"/>
     </service>
 
     <service id="gdbots_ncr.update_node_tags_handler" class="Gdbots\Ncr\UpdateNodeTagsHandler">
+      <argument type="service" id="ncr"/>
       <tag name="pbjx.handler"/>
     </service>
 
