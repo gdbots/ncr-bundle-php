@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 2.x versions.
 
 
+## v2.1.1
+* Add Ncr argument to `gdbots_ncr.update_node_labels_handler` and `gdbots_ncr.update_node_tags_handler`
+
+
 ## v2.1.0
 * Uses `"gdbots/ncr": "^2.1"`
 * Uses `"gdbots/pbjx-bundle": "^2.1"`

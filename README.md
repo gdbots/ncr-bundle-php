@@ -1,8 +1,6 @@
 ncr-bundle-php
 =============
 
-[![Build Status](https://api.travis-ci.org/gdbots/ncr-bundle-php.svg)](https://travis-ci.org/gdbots/ncr-bundle-php)
-
 Symfony bundle that integrates [gdbots/ncr](https://github.com/gdbots/ncr-php) library.
 
 
