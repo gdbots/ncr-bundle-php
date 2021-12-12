@@ -71,7 +71,7 @@ EOF
     {
         $skipErrors = $input->getOption('skip-errors');
         $context = $input->getOption('context') ?: '{}';
-        if (strpos($context, '{') === false) {
+        if (!str_contains($context, '{')) {
             $context = base64_decode($context);
         }
         $context = json_decode($context, true);
