@@ -24,10 +24,10 @@ final class NcrExtension extends AbstractExtension
     private bool $debug;
 
     public function __construct(
-        NcrCache $ncrCache,
-        NcrPreloader $ncrPreloader,
+        NcrCache         $ncrCache,
+        NcrPreloader     $ncrPreloader,
         ?LoggerInterface $logger = null,
-        bool $debug = false
+        bool             $debug = false
     ) {
         $this->ncrCache = $ncrCache;
         $this->ncrPreloader = $ncrPreloader;
@@ -35,7 +35,7 @@ final class NcrExtension extends AbstractExtension
         $this->debug = $debug;
     }
 
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('ncr_deref_nodes', [$this, 'derefNodes']),
@@ -51,15 +51,15 @@ final class NcrExtension extends AbstractExtension
     }
 
     /**
-     * @param Message $node
-     * @param array   $fields
-     * @param string  $return
+     * @param Message     $node
+     * @param array       $fields
+     * @param string|null $return
      *
      * @return array
      *
      * @see NcrCache::derefNodes
      */
-    public function derefNodes($node, array $fields = [], ?string $return = null): array
+    public function derefNodes(mixed $node, array $fields = [], ?string $return = null): array
     {
         if (!$node instanceof Message) {
             return [];
@@ -75,11 +75,11 @@ final class NcrExtension extends AbstractExtension
      *
      * @param NodeRef|MessageRef|string $ref
      *
-     * @return Message
+     * @return Message|null
      *
      * @throws \Throwable
      */
-    public function getNode($ref): ?Message
+    public function getNode(mixed $ref): ?Message
     {
         $nodeRef = $this->toNodeRef($ref);
         if (!$nodeRef instanceof NodeRef) {
@@ -113,7 +113,7 @@ final class NcrExtension extends AbstractExtension
             return false;
         }
 
-        return NodeStatus::PUBLISHED === $node->fget('status');
+        return NodeStatus::PUBLISHED->value === $node->fget('status');
     }
 
     /**
@@ -154,7 +154,7 @@ final class NcrExtension extends AbstractExtension
      * @param NodeRef|MessageRef|string $ref
      * @param string                    $namespace
      */
-    public function preloadNode($ref, string $namespace = NcrPreloader::DEFAULT_NAMESPACE): void
+    public function preloadNode(mixed $ref, string $namespace = NcrPreloader::DEFAULT_NAMESPACE): void
     {
         $nodeRef = $this->toNodeRef($ref);
         if (!$nodeRef instanceof NodeRef) {
@@ -177,21 +177,21 @@ final class NcrExtension extends AbstractExtension
 
     /**
      * @param Message[] $messages Array of messages to extract NodeRefs from.
-     * @param array     $paths    An associative array of ['field_name' => 'qname'], i.e. ['user_id', 'acme:user']
+     * @param array     $paths    An associative array of ['field_name' => 'qname'], e.g. ['user_id' => 'acme:user']
      * @param string    $namespace
      *
      * @see NcrPreloader::addEmbeddedNodeRefs
      *
      */
     public function preloadEmbeddedNodes(
-        array $messages,
-        array $paths = [],
+        array  $messages,
+        array  $paths = [],
         string $namespace = NcrPreloader::DEFAULT_NAMESPACE
     ): void {
         $this->ncrPreloader->addEmbeddedNodeRefs($messages, $paths, $namespace);
     }
 
-    public function toNodeRef($val): ?NodeRef
+    public function toNodeRef(mixed $val): ?NodeRef
     {
         if ($val instanceof NodeRef) {
             return $val;

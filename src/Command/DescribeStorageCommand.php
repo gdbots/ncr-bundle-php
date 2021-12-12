@@ -64,7 +64,7 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $context = $input->getOption('context') ?: '{}';
-        if (strpos($context, '{') === false) {
+        if (!str_contains($context, '{')) {
             $context = base64_decode($context);
         }
         $context = json_decode($context, true);

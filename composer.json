@@ -5,9 +5,9 @@
   "type": "symfony-bundle",
   "license": "Apache-2.0",
   "require": {
-    "php": ">=7.4",
-    "gdbots/ncr": "^2.1",
-    "gdbots/pbjx-bundle": "^2.1"
+    "php": ">=8.1",
+    "gdbots/ncr": "^3.0",
+    "gdbots/pbjx-bundle": "^3.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5",

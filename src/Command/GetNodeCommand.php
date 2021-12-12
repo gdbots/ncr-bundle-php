@@ -78,14 +78,14 @@ EOF
         $errOutput->setVerbosity(OutputInterface::VERBOSITY_NORMAL);
 
         $context = $input->getOption('context') ?: '{}';
-        if (strpos($context, '{') === false) {
+        if (!str_contains($context, '{')) {
             $context = base64_decode($context);
         }
         $context = json_decode($context, true);
         $context['tenant_id'] = (string)$input->getOption('tenant-id');
 
         $nodeRef = NodeRef::fromString($input->getArgument('node-ref'));
-        $consistent = $input->getOption('consistent') ? true : false;
+        $consistent = (bool)$input->getOption('consistent');
 
         try {
             $node = $this->ncr->getNode($nodeRef, $consistent, $context);
