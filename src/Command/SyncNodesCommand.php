@@ -142,7 +142,7 @@ EOF
                         $i,
                         $aggregate->getEtag() !== $expectedEtag ? 'SYNCED' : 'MATCHED',
                         $nodeRef,
-                        $node->get('status'),
+                        $node->fget('status'),
                         $node->get('etag'),
                         $node->get('title')
                     ));

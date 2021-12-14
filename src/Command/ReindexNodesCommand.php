@@ -139,7 +139,7 @@ EOF
                     '<comment>etag:</comment>%s, <comment>title:</comment>%s',
                     $i,
                     $node->generateNodeRef(),
-                    $node->get('status'),
+                    $node->fget('status'),
                     $node->get('etag'),
                     $node->get('title')
                 ));
