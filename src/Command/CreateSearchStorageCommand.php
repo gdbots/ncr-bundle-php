@@ -7,6 +7,7 @@ use Gdbots\Ncr\NcrSearch;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\SchemaCurie;
 use Gdbots\Pbj\SchemaQName;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,16 +16,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+#[AsCommand(name: 'ncr:create-search-storage')]
 final class CreateSearchStorageCommand extends Command
 {
-    protected static $defaultName = 'ncr:create-search-storage';
-    protected ContainerInterface $container;
-    protected NcrSearch $ncrSearch;
-
-    public function __construct(ContainerInterface $container, NcrSearch $ncrSearch)
+    public function __construct(protected ContainerInterface $container, protected NcrSearch $ncrSearch)
     {
-        $this->container = $container;
-        $this->ncrSearch = $ncrSearch;
         parent::__construct();
     }
 

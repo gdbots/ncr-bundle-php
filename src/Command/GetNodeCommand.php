@@ -5,6 +5,7 @@ namespace Gdbots\Bundle\NcrBundle\Command;
 
 use Gdbots\Ncr\Ncr;
 use Gdbots\Pbj\WellKnown\NodeRef;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,16 +14,11 @@ use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+#[AsCommand(name: 'ncr:get-node')]
 final class GetNodeCommand extends Command
 {
-    protected static $defaultName = 'ncr:get-node';
-    protected ContainerInterface $container;
-    protected Ncr $ncr;
-
-    public function __construct(ContainerInterface $container, Ncr $ncr)
+    public function __construct(protected ContainerInterface $container, protected Ncr $ncr)
     {
-        $this->container = $container;
-        $this->ncr = $ncr;
         parent::__construct();
     }
 

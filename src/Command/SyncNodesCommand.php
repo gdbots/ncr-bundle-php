@@ -12,6 +12,7 @@ use Gdbots\Pbj\SchemaCurie;
 use Gdbots\Pbj\SchemaQName;
 use Gdbots\Pbj\Util\NumberUtil;
 use Gdbots\Pbjx\Pbjx;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,20 +21,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+#[AsCommand(name: 'ncr:sync-nodes')]
 final class SyncNodesCommand extends Command
 {
-    protected static $defaultName = 'ncr:sync-nodes';
-    protected ContainerInterface $container;
-    protected Ncr $ncr;
-    protected NcrSearch $ncrSearch;
-    protected Pbjx $pbjx;
-
-    public function __construct(ContainerInterface $container, Ncr $ncr, NcrSearch $ncrSearch, Pbjx $pbjx)
-    {
-        $this->container = $container;
-        $this->ncr = $ncr;
-        $this->ncrSearch = $ncrSearch;
-        $this->pbjx = $pbjx;
+    public function __construct(
+        protected ContainerInterface $container,
+        protected Ncr $ncr,
+        protected NcrSearch $ncrSearch,
+        protected Pbjx $pbjx
+    ) {
         parent::__construct();
     }
 
