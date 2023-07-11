@@ -33,7 +33,7 @@ final class SyncNodesCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $provider = $this->container->getParameter('gdbots_ncr.ncr.provider');
         $searchProvider = $this->container->getParameter('gdbots_ncr.ncr_search.provider');

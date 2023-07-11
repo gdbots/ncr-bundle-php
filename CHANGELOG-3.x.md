@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 3.x versions.
 
 
+## v3.1.1
+* Updates for symfony 6.3.x deprecations.
+
+
 ## v3.1.0
 * Require gdbots/pbjx-bundle 3.1.x
 * Use new symfony/php attributes instead of annotations.

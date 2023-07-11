@@ -25,7 +25,7 @@ final class ExportNodesCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $provider = $this->container->getParameter('gdbots_ncr.ncr.provider');
 
