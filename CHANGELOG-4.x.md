@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 4.x versions.
 
 
+## v4.0.1
+* Handle Symfony deprecations.
+
+
 ## v4.0.0
 __BREAKING CHANGES__
 
