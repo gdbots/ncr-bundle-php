@@ -1,0 +1,29 @@
+services:
+  _defaults:
+    public: false
+
+  gdbots_ncr.ncr_search.elastica:
+    class: '%gdbots_ncr.ncr_search.elastica.class%'
+    arguments:
+      - '@gdbots_ncr.ncr_search.elastica.client_manager'
+      - '@gdbots_pbjx.event_dispatcher'
+      - '@gdbots_ncr.ncr_search.elastica.index_manager'
+      - '@?logger'
+      - '%gdbots_ncr.ncr_search.elastica.query_timeout%'
+    tags:
+      - { name: monolog.logger, channel: ncr }
+
+  gdbots_ncr.ncr_search.elastica.client_manager:
+    class: Gdbots\Ncr\Search\Elastica\ClientManager
+    arguments:
+      - '%gdbots_ncr.ncr_search.elastica.clusters%'
+      - '@?logger'
+    tags:
+      - { name: monolog.logger, channel: ncr }
+
+  gdbots_ncr.ncr_search.elastica.index_manager:
+    class: '%gdbots_ncr.ncr_search.elastica.index_manager.class%'
+    arguments:
+      - '%gdbots_ncr.ncr_search.elastica.index_manager.index_prefix%'
+      - '%gdbots_ncr.ncr_search.elastica.index_manager.indexes%'
+      - '%gdbots_ncr.ncr_search.elastica.index_manager.types%'

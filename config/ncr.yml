@@ -1,0 +1,37 @@
+services:
+  _defaults:
+    public: false
+
+  gdbots_ncr.ncr.memoizing:
+    class: Gdbots\Ncr\Repository\MemoizingNcr
+    decorates: ncr
+    decoration_priority: -1000
+    arguments:
+      - '@gdbots_ncr.ncr.memoizing.inner'
+      - '@ncr_cache'
+      - '%gdbots_ncr.ncr.memoizing.read_through%'
+
+  gdbots_ncr.ncr.psr6:
+    class: '%gdbots_ncr.ncr.psr6.class%'
+    decorates: ncr
+    arguments:
+      - '@gdbots_ncr.ncr.psr6.inner'
+      - '@cache.app'
+      - '%gdbots_ncr.ncr.psr6.read_through%'
+
+  gdbots_ncr.ncr.dynamodb:
+    class: '%gdbots_ncr.ncr.dynamodb.class%'
+    arguments:
+      - '@?aws.dynamodb'
+      - '@gdbots_pbjx.event_dispatcher'
+      - '@gdbots_ncr.ncr.dynamodb.table_manager'
+      - '%gdbots_ncr.ncr.dynamodb.config%'
+      - '@?logger'
+    tags:
+      - { name: monolog.logger, channel: ncr }
+
+  gdbots_ncr.ncr.dynamodb.table_manager:
+    class: '%gdbots_ncr.ncr.dynamodb.table_manager.class%'
+    arguments:
+      - '%gdbots_ncr.ncr.dynamodb.table_manager.table_name_prefix%'
+      - '%gdbots_ncr.ncr.dynamodb.table_manager.node_tables%'

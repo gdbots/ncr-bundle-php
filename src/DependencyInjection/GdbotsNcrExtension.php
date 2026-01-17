@@ -12,7 +12,7 @@ use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 
 final class GdbotsNcrExtension extends Extension
@@ -23,12 +23,12 @@ final class GdbotsNcrExtension extends Extension
         $configuration = new Configuration();
 
         $configs = $processor->processConfiguration($configuration, $configs);
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../../config'));
-        $loader->load('ncr.xml');
-        $loader->load('ncr_cache.xml');
-        $loader->load('ncr_search.xml');
-        $loader->load('services.xml');
-        $loader->load('twig.xml');
+        $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../../config'));
+        $loader->load('ncr.yml');
+        $loader->load('ncr_cache.yml');
+        $loader->load('ncr_search.yml');
+        $loader->load('services.yml');
+        $loader->load('twig.yml');
 
         // ncr
         $container->setParameter('gdbots_ncr.ncr.provider', $configs['ncr']['provider']);

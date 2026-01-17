@@ -1,0 +1,159 @@
+parameters:
+  env(NCR_PROJECTOR_ENABLED): 'true'
+
+services:
+  _defaults:
+    public: false
+
+  Gdbots\Bundle\NcrBundle\Command\:
+    resource: '../src/Command/*'
+    autoconfigure: true
+    autowire: true
+
+  gdbots_ncr.node_command_binder:
+    class: Gdbots\Ncr\NodeCommandBinder
+    tags:
+      - { name: pbjx.event_subscriber }
+      - { name: pbjx.binder }
+
+  gdbots_ncr.node_idempotency_validator:
+    class: Gdbots\Ncr\NodeIdempotencyValidator
+    arguments:
+      - '@cache.app'
+      - '%gdbots_ncr.node_idempotency_validator.ttl%'
+    tags:
+      - { name: pbjx.event_subscriber }
+      - { name: pbjx.validator }
+
+  gdbots_ncr.unique_node_validator:
+    class: Gdbots\Ncr\UniqueNodeValidator
+    tags:
+      - { name: pbjx.event_subscriber }
+      - { name: pbjx.validator }
+
+  gdbots_ncr.create_node_handler:
+    class: Gdbots\Ncr\CreateNodeHandler
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.delete_node_handler:
+    class: Gdbots\Ncr\DeleteNodeHandler
+    arguments:
+      - '@ncr'
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.expire_node_handler:
+    class: Gdbots\Ncr\ExpireNodeHandler
+    arguments:
+      - '@ncr'
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.lock_node_handler:
+    class: Gdbots\Ncr\LockNodeHandler
+    arguments:
+      - '@ncr'
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.mark_node_as_draft_handler:
+    class: Gdbots\Ncr\MarkNodeAsDraftHandler
+    arguments:
+      - '@ncr'
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.mark_node_as_pending_handler:
+    class: Gdbots\Ncr\MarkNodeAsPendingHandler
+    arguments:
+      - '@ncr'
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.publish_node_handler:
+    class: Gdbots\Ncr\PublishNodeHandler
+    arguments:
+      - '@ncr'
+      - '%env(default::LOCAL_TIMEZONE)%'
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.rename_node_handler:
+    class: Gdbots\Ncr\RenameNodeHandler
+    arguments:
+      - '@ncr'
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.unlock_node_handler:
+    class: Gdbots\Ncr\UnlockNodeHandler
+    arguments:
+      - '@ncr'
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.unpublish_node_handler:
+    class: Gdbots\Ncr\UnpublishNodeHandler
+    arguments:
+      - '@ncr'
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.update_node_handler:
+    class: Gdbots\Ncr\UpdateNodeHandler
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.update_node_labels_handler:
+    class: Gdbots\Ncr\UpdateNodeLabelsHandler
+    arguments:
+      - '@ncr'
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.update_node_tags_handler:
+    class: Gdbots\Ncr\UpdateNodeTagsHandler
+    arguments:
+      - '@ncr'
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.get_node_batch_request_handler:
+    class: Gdbots\Ncr\GetNodeBatchRequestHandler
+    arguments:
+      - '@ncr'
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.get_node_history_request_handler:
+    class: Gdbots\Ncr\GetNodeHistoryRequestHandler
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.get_node_request_handler:
+    class: Gdbots\Ncr\GetNodeRequestHandler
+    arguments:
+      - '@ncr'
+    tags:
+      - { name: pbjx.handler }
+
+  gdbots_ncr.ncr_projector:
+    class: Gdbots\Ncr\NcrProjector
+    arguments:
+      - '@ncr'
+      - '@ncr_search'
+      - '%env(bool:NCR_PROJECTOR_ENABLED)%'
+    tags:
+      - { name: pbjx.event_subscriber }
+      - { name: pbjx.projector }
+
+  gdbots_ncr.expirable_watcher:
+    class: Gdbots\Ncr\ExpirableWatcher
+    tags:
+      - { name: pbjx.event_subscriber }
+
+  gdbots_ncr.publishable_watcher:
+    class: Gdbots\Ncr\PublishableWatcher
+    tags:
+      - { name: pbjx.event_subscriber }

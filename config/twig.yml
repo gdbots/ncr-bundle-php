@@ -1,0 +1,12 @@
+services:
+  gdbots_ncr.twig.ncr_extension:
+    class: Gdbots\Bundle\NcrBundle\Twig\NcrExtension
+    public: false
+    arguments:
+      - '@ncr_cache'
+      - '@ncr_preloader'
+      - '@?logger'
+      - '%kernel.debug%'
+    tags:
+      - { name: monolog.logger, channel: ncr }
+      - { name: twig.extension }

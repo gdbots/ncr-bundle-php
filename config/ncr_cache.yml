@@ -1,0 +1,31 @@
+services:
+  _defaults:
+    public: false
+
+  ncr_cache:
+    class: Gdbots\Ncr\NcrCache
+    arguments:
+      - '@ncr_lazy_loader'
+      - '%gdbots_ncr.ncr_cache.max_items%'
+
+  ncr_lazy_loader:
+    class: Gdbots\Ncr\NcrLazyLoader
+    arguments:
+      - '@pbjx'
+      - '@?logger'
+    tags:
+      - { name: monolog.logger, channel: ncr }
+
+  ncr_preloader:
+    class: Gdbots\Ncr\NcrPreloader
+    arguments:
+      - '@ncr_lazy_loader'
+      - '@ncr_cache'
+
+  gdbots_ncr.ncr_request_interceptor:
+    class: Gdbots\Ncr\NcrRequestInterceptor
+    arguments:
+      - '@cache.app'
+      - '@ncr_cache'
+    tags:
+      - { name: pbjx.event_subscriber }
